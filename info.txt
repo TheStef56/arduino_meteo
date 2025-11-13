@@ -1,0 +1,5 @@
+database:
+    37 [4 epoch, 33 data] bytes every 5 mins: 3456 bytes a day, 319,68 KB for a month worth of data
+
+traffic:
+    TCP: 424 (360 bytes of TCP overhead + 36 bytes of data + 28 of AES-GSM) every 5 min: 122,11 KB a day, 44,57 MB a year (500MB = 11,2 years)
