@@ -13,22 +13,23 @@ void setup() {
     Serial.begin(9600);
     while (!Serial);
   )
-  // setupBme();
+  setupBme();
   setupWifi();
 }
 
 void loop() {
+  BMEData bme = getBMEdata();
   sendData(
     (Data){
-    .windSpeedOpen  = 7.3f,
-    .windSpeedClose = 9.3f,
-    .windSpeedHigh  = 10.3f,
-    .windSpeedLow   = 6.3f,
-    .temperature    = 30.2f,
-    .humidity       = 90.5f,
-    .bmp            = 1019.0f,
+    .windSpeedOpen  = 0.f,//7.3f,
+    .windSpeedClose = 0.f,//9.3f,
+    .windSpeedHigh  = 0.f,//10.3f,
+    .windSpeedLow   = 0.f,//6.3f,
+    .temperature    = bme.temperature,//30.2f,
+    .humidity       = bme.humidity,//90.5f,
+    .bmp            = bme.bmp,//1019.0f,
     .batteryVolts   = getBatteryVoltage(),
-    .windDirection  = 2,
+    .windDirection  = 1.f,
   });
 
   // IF_SERIAL_DEBUG(Serial.println(getAnemometerVoltage()));

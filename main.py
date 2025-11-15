@@ -7,7 +7,10 @@ from env import AES_KEY
 app = Flask(__name__)
 HOST = '0.0.0.0'
 
+DATACHANGED = False
+
 def socket_listener():
+    global DATACHANGED
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((HOST, 9000))
     s.listen(5)
@@ -50,7 +53,8 @@ wind_dir        : {wind_dir}
                     battery,
                     wind_dir
                     )
-        
+        DATACHANGED = True
+
 @app.route('/')
 def home():
     return render_template("index.html")
@@ -58,6 +62,15 @@ def home():
 @app.route('/data')
 def data():
     return json.dumps(read_from_db())
+
+@app.route('/data-changed')
+def data_changed():
+    global DATACHANGED
+    if DATACHANGED:
+        DATACHANGED = False
+        return "yes"
+    else:
+        return "no"
 
 if __name__ == '__main__':
     threading.Thread(target=socket_listener, daemon=True).start()

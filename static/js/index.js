@@ -121,8 +121,12 @@ const batterySeries       = batteryChart.addSeries       (MyCharts.LineSeries);
 fetchData();
 
 setInterval(() => {
-    fetchData();
-}, 5*60*1000);
+    fetch("/data-changed").then(data => {
+        data.text().then(res => {
+            if (res == "yes") fetchData();
+        });
+    });
+}, 1000);
 
 document.getElementById("timeframe").addEventListener("input", () => {
     fetchData();
