@@ -37,7 +37,7 @@ now = time.time()
 now -= 3600*24*30
 times = 12*24*30
 for x in range(times):
-    now += 5*60
+    now += 5*60+ (random.random()*120-40)
     write_to_db(
         now,
         wind_speed_open  = random.random()*60,
