@@ -36,6 +36,7 @@ void setupWifi() {
   if (fv < WIFI_FIRMWARE_LATEST_VERSION) {
     IF_SERIAL_DEBUG(Serial.println("Please upgrade the firmware"));
   }
+
   int status = WiFi.status();
   while (status != WL_CONNECTED) {
     IF_SERIAL_DEBUG(Serial.print("Attempting to connect to SSID: "));
@@ -48,9 +49,7 @@ void setupWifi() {
 
 int sendWifiMessage(const char *ip, int port, uint8_t *message, size_t size) {
   WiFiClient client;
-  shutDownWifi();
-  setupWifi();
-
+  
   int res = client.connect(ip, port);
   if (res) {
     IF_SERIAL_DEBUG(Serial.println("Connected to socket!"));
@@ -61,6 +60,8 @@ int sendWifiMessage(const char *ip, int port, uint8_t *message, size_t size) {
     IF_SERIAL_DEBUG(Serial.print("Connection failed: "));
     IF_SERIAL_DEBUG(Serial.println(res));
     IF_SERIAL_DEBUG(printWifiStatus());
+    shutDownWifi();
+    setupWifi();
     return 0;
   }
 }
@@ -87,5 +88,5 @@ int sendWifiMessageEnc(const char *ip, int port, uint8_t *message, size_t size, 
   memcpy(fullPayload + sizeof(encrypted)                 , &nonce     , sizeof(nonce));
   memcpy(fullPayload + sizeof(encrypted) +  sizeof(nonce), &authTag  ,  sizeof(authTag));
 
-  sendWifiMessage(ip, port, (byte*)(void*)&fullPayload, sizeof(fullPayload));
+  return sendWifiMessage(ip, port, (byte*)(void*)&fullPayload, sizeof(fullPayload));
 }
