@@ -1,5 +1,9 @@
+let sizeFactor    = 0.95;
+let minChartWidth = 0;
+let maxChartWidth = 99999999;
+
 const timeTable = {
-    "unfiltered" : 0,
+    "Unfiltered" : 0,
     "5m"         : 300,
     "30m"        : 1800,
     "1h"         : 3600,
@@ -10,9 +14,24 @@ const timeTable = {
     "7d"         : 604800
 }
 
+const plotArrangements = {
+    "Landscape" : {
+        "factor"   : 0.95,
+        "classList": ["container-landscape"],
+        "minWidth" : 0,
+        "maxWidth" : 99999999
+    },
+    "Grid": {
+        "factor"   : 0.35,
+        "classList": ["container-grid"],
+        "minWidth" : 300,
+        "maxWidth" : 500,
+    }
+}
+
 function createChartById(id) {
     return MyCharts.createChart(document.getElementById(id), {
-        width: window.innerWidth*0.95, 
+        width: window.innerWidth*sizeFactor, 
         height: 300,
         layout: {
             background: { color: '#121212' }, // chart background
@@ -72,7 +91,6 @@ function changeTimeFrame(data, period) {
     return result;
 }
 
-
 function fetchData() {
     const timeframeValue = document.getElementById("timeframe").value;
     const period = timeTable[timeframeValue];
@@ -124,6 +142,17 @@ const humiditySeries      = humidityChart.addSeries      (MyCharts.LineSeries);
 const bmpSeries           = bmpChart.addSeries           (MyCharts.LineSeries);
 const batterySeries       = batteryChart.addSeries       (MyCharts.LineSeries);
 
+function changeArrangement() {
+    const selector      = document.getElementById("plot-arrangement");
+    const container     = document.getElementById("container");
+    const arrangement   = plotArrangements[selector.value];
+    container.classList = arrangement["classList"];
+    sizeFactor          = arrangement["factor"];
+    minChartWidth       = arrangement["minWidth"];
+    maxChartWidth       = arrangement["maxWidth"];
+    window.dispatchEvent(new Event('resize'));
+}
+
 fetchData();
 
 setInterval(() => {
@@ -138,11 +167,15 @@ document.getElementById("timeframe").addEventListener("input", () => {
     fetchData();
 });
 
+document.getElementById("plot-arrangement").addEventListener("input", () => {
+    changeArrangement();
+});
+
 window.addEventListener("resize", () => {
-    windSpeedChart.applyOptions     ({ width: window.innerWidth*0.95 });
-    windDirectionChart.applyOptions ({ width: window.innerWidth*0.95 });
-    temperatureChart.applyOptions   ({ width: window.innerWidth*0.95 });
-    humidityChart.applyOptions      ({ width: window.innerWidth*0.95 });
-    bmpChart.applyOptions      ({ width: window.innerWidth*0.95 });
-    batteryChart.applyOptions       ({ width: window.innerWidth*0.95 });
+    windSpeedChart.applyOptions     ({ width: Math.min(Math.max(window.innerWidth*sizeFactor, minChartWidth), maxChartWidth) });
+    windDirectionChart.applyOptions ({ width: Math.min(Math.max(window.innerWidth*sizeFactor, minChartWidth), maxChartWidth) });
+    temperatureChart.applyOptions   ({ width: Math.min(Math.max(window.innerWidth*sizeFactor, minChartWidth), maxChartWidth) });
+    humidityChart.applyOptions      ({ width: Math.min(Math.max(window.innerWidth*sizeFactor, minChartWidth), maxChartWidth) });
+    bmpChart.applyOptions           ({ width: Math.min(Math.max(window.innerWidth*sizeFactor, minChartWidth), maxChartWidth) });
+    batteryChart.applyOptions       ({ width: Math.min(Math.max(window.innerWidth*sizeFactor, minChartWidth), maxChartWidth) });
 });
