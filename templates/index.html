@@ -6,49 +6,83 @@
     <title>Meteo</title>
     <script src="/static/js/chart.js"></script>
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/bulma/css/bulma.min.css">
 </head>
 <body>
     <header>
-        <div id="settings-container">
-            <p>Timeframe:</p>
-            <select name="timeframe" id="timeframe">
-                <option value="Unfiltered">Unfiltered</option>
-                <option value="5m">5m</option>
-                <option value="30m">30m</option>
-                <option value="1h">1h</option>
-                <option value="3h">3h</option>
-                <option value="6h">6h</option>
-                <option value="12h">12h</option>
-                <option value="1d">1d</option>
-                <option value="7d">7d</option>
-            </select>
-            <p>Arrangement:</p>
-            <select name="plot-arrangement" id="plot-arrangement">
-                <option value="Landscape">Landscape</option>
-                <option value="Grid">Grid</option>
-            </select>
+        <div class="top-center">
+                <h1>Arduino Meteo</h1>
         </div>
-        <h1>Arduino Meteo</h1>
+        <nav class="navbar shop-nav has-background-dark" role="navigation" aria-label="main navigation">
+            <div class="navbar-brand">
+                <a role="button" class="navbar-burger has-text-white" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div id="navbarBasicExample" class="navbar-menu">
+                <div class="navbar-start">
+                    <!-- Theme Dropdown -->
+                    <div class="navbar-item has-dropdown is-hoverable">
+                        <a id="theme" class="navbar-link has-text-white">
+                            Dark
+                        </a>
+                        <div class="navbar-dropdown is-right">
+                            <a class="navbar-item has-text-white" onclick="changeThemeLabel('Light')">Light</a>
+                            <a class="navbar-item has-text-white" onclick="changeThemeLabel('Dark')">Dark</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Timeframe Dropdown -->
+                    <div class="navbar-item has-dropdown is-hoverable">
+                        <a id="timeframe" class="navbar-link has-text-white">Unfiltered</a>
+                        <div class="navbar-dropdown is-right">
+                            <a class="navbar-item has-text-white" onclick="changeTimeFrameLabel('Unfiltered')">Unfiltered</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimeFrameLabel('5m')">5m</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimeFrameLabel('30m')">30m</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimeFrameLabel('1h')">1h</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimeFrameLabel('3h')">3h</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimeFrameLabel('6h')">6h</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimeFrameLabel('12h')">12h</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimeFrameLabel('1d')">1d</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimeFrameLabel('7d')">7d</a>
+                        </div>
+                    </div>
+                    <!-- Arrangement Dropdown  -->
+                    <div class="navbar-item has-dropdown is-hoverable">
+                        <a id="arrangement" class="navbar-link has-text-white">
+                            Landscape
+                        </a>
+                        <div class="navbar-dropdown is-right">
+                            <a class="navbar-item has-text-white" onclick="changeArrangementLabel('Landscape')">Landscape</a>
+                            <a class="navbar-item has-text-white" onclick="changeArrangementLabel('Grid')">Grid</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
     </header>
     <main>
         <div class="container-landscape" id="container">
             <div class="chart-container" id="wind-speed-chart">
-                <h2>Wind Speed (km/h)</h2>
+                <h2 class="subtitle-white">Wind Speed (km/h)</h2>
             </div>
             <div class="chart-container" id="wind-direction-chart">
-                <h2>Wind Direction (degrees)</h2>
+                <h2 class="subtitle-white">Wind Direction (degrees)</h2>
             </div>
             <div class="chart-container" id="temperature-chart">
-                <h2>Temperature (°C)</h2>
+                <h2 class="subtitle-white">Temperature (°C)</h2>
             </div>
             <div class="chart-container" id="bmp-chart">
-                <h2>Barometric pressure (hPa)</h2>
+                <h2 class="subtitle-white">Barometric pressure (hPa)</h2>
             </div>
             <div class="chart-container" id="humidity-chart">
-                <h2>Humidity (%)</h2>
+                <h2 class="subtitle-white">Humidity (%)</h2>
             </div>
             <div class="chart-container" id="battery-chart">
-                <h2>Battery (V)</h2>
+                <h2 class="subtitle-white">Battery (V)</h2>
             </div>
         </div>
     </main>

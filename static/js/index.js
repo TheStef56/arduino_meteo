@@ -1,6 +1,7 @@
 let sizeFactor    = 0.95;
 let minChartWidth = 0;
 let maxChartWidth = 99999999;
+let darkMode = true;
 
 const timeTable = {
     "Unfiltered" : 0,
@@ -12,21 +13,6 @@ const timeTable = {
     "12h"        : 43200,
     "1d"         : 86400,
     "7d"         : 604800
-}
-
-const plotArrangements = {
-    "Landscape" : {
-        "factor"   : 0.95,
-        "classList": ["container-landscape"],
-        "minWidth" : 0,
-        "maxWidth" : 99999999
-    },
-    "Grid": {
-        "factor"   : 0.35,
-        "classList": ["container-grid"],
-        "minWidth" : 300,
-        "maxWidth" : 500,
-    }
 }
 
 function createChartById(id) {
@@ -92,7 +78,7 @@ function changeTimeFrame(data, period) {
 }
 
 function fetchData() {
-    const timeframeValue = document.getElementById("timeframe").value;
+    const timeframeValue = document.getElementById("timeframe").innerText;
     const period = timeTable[timeframeValue];
 
     fetch("/data", {
@@ -135,23 +121,14 @@ const humidityChart      = createChartById('humidity-chart');
 const bmpChart           = createChartById('bmp-chart');
 const batteryChart       = createChartById('battery-chart');
 
+const allCharts = [ windSpeedChart, windDirectionChart, temperatureChart, humidityChart, bmpChart, batteryChart]
+
 const windSpeedSeries     = windSpeedChart.addSeries     (MyCharts.CandlestickSeries);
 const windDirectionSeries = windDirectionChart.addSeries (MyCharts.LineSeries);
 const temperatureSeries   = temperatureChart.addSeries   (MyCharts.LineSeries);
 const humiditySeries      = humidityChart.addSeries      (MyCharts.LineSeries);
 const bmpSeries           = bmpChart.addSeries           (MyCharts.LineSeries);
 const batterySeries       = batteryChart.addSeries       (MyCharts.LineSeries);
-
-function changeArrangement() {
-    const selector      = document.getElementById("plot-arrangement");
-    const container     = document.getElementById("container");
-    const arrangement   = plotArrangements[selector.value];
-    container.classList = arrangement["classList"];
-    sizeFactor          = arrangement["factor"];
-    minChartWidth       = arrangement["minWidth"];
-    maxChartWidth       = arrangement["maxWidth"];
-    window.dispatchEvent(new Event('resize'));
-}
 
 fetchData();
 
@@ -161,15 +138,7 @@ setInterval(() => {
             if (res == "yes") fetchData();
         });
     });
-}, 1000);
-
-document.getElementById("timeframe").addEventListener("input", () => {
-    fetchData();
-});
-
-document.getElementById("plot-arrangement").addEventListener("input", () => {
-    changeArrangement();
-});
+}, 5000);
 
 window.addEventListener("resize", () => {
     windSpeedChart.applyOptions     ({ width: Math.min(Math.max(window.innerWidth*sizeFactor, minChartWidth), maxChartWidth) });
@@ -178,4 +147,127 @@ window.addEventListener("resize", () => {
     humidityChart.applyOptions      ({ width: Math.min(Math.max(window.innerWidth*sizeFactor, minChartWidth), maxChartWidth) });
     bmpChart.applyOptions           ({ width: Math.min(Math.max(window.innerWidth*sizeFactor, minChartWidth), maxChartWidth) });
     batteryChart.applyOptions       ({ width: Math.min(Math.max(window.innerWidth*sizeFactor, minChartWidth), maxChartWidth) });
+});
+
+// UI callbacks ---------------------------------------------------------------------------
+
+const plotArrangements = {
+    "Landscape" : {
+        "factor"   : 0.95,
+        "classList": ["container-landscape"],
+        "minWidth" : 0,
+        "maxWidth" : 99999999
+    },
+    "Grid": {
+        "factor"   : 0.35,
+        "classList": ["container-grid"],
+        "minWidth" : 300,
+        "maxWidth" : 500,
+    }
+}
+
+
+function changeArrangement() {
+    const selector      = document.getElementById("arrangement");
+    const container     = document.getElementById("container");
+    const arrangement   = plotArrangements[selector.innerText];
+    container.classList = arrangement["classList"];
+    sizeFactor          = arrangement["factor"];
+    minChartWidth       = arrangement["minWidth"];
+    maxChartWidth       = arrangement["maxWidth"];
+    window.dispatchEvent(new Event('resize'));
+}
+
+
+function changeArrangementLabel(label) {
+    document.getElementById("arrangement").innerText = label;
+    changeArrangement();
+}
+
+function changeTimeFrameLabel(label) {
+    document.getElementById("timeframe").innerText = label;
+    fetchData();
+}
+
+function changeThemeLabel(label) {
+    const element = document.getElementById("theme");
+    if (label == "Light") {
+        document.documentElement.style.setProperty('--custom-background', 'var(--light-white)');
+        document.documentElement.style.setProperty('--custom-foreground', 'var(--dark-white)');
+        Array.from(document.getElementsByClassName("subtitle-white")).forEach(element => {
+            element.classList = ['subtitle-black'];
+        })
+        allCharts.forEach(chart => {
+            chart.applyOptions({
+                layout: {
+                    background: { color: '#FFFFFF' }, // chart background
+                    textColor: '#000000',             // axis + labels
+                },
+                grid: {
+                    vertLines: { color: '#D6DCDE' },
+                    horzLines: { color: '#D6DCDE' },
+                }});
+        });
+        element.innerText = "Light";
+    } else if (label == "Dark") {
+        document.documentElement.style.setProperty('--custom-background', 'var(--light-grey)');
+        document.documentElement.style.setProperty('--custom-foreground', 'var(--dark-black)');
+        Array.from(document.getElementsByClassName("subtitle-black")).forEach(element => {
+            element.classList = ['subtitle-white'];
+        })
+        allCharts.forEach(chart => {
+            chart.applyOptions({
+                layout: {
+                    background: { color: '#121212' }, // chart background
+                    textColor: '#D1D4DC',             // axis + labels
+                },
+                grid: {
+                    vertLines: { color: '#2B2B43' },
+                    horzLines: { color: '#2B2B43' },
+                }});
+        });
+        element.innerText = "Dark";
+    }
+}
+
+//  Navbar stuff ---------------------------------------------------------------------------
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Get all "navbar-burger" elements
+    const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+
+    // Add a click event on each of them
+    $navbarBurgers.forEach( el => {
+        el.addEventListener('click', () => {
+            // Get the target from the "data-target" attribute
+            const target = el.dataset.target;
+            const $target = document.getElementById(target);
+
+            // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
+            el.classList.toggle('is-active');
+            $target.classList.toggle('is-active');
+        });
+    });
+
+    const searchIcon = document.getElementById('search-icon');
+    const inputSearch = document.getElementById('search');
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('q')) {
+        searchIcon.onclick = () => {window.location.href = "/";};
+        inputSearch.value = params.get('q');
+    } else {
+        searchIcon.onclick = () => {search(inputSearch.value);};
+    }
+
+    inputSearch.addEventListener('keydown', (event) => {
+        if (event.key == 'Enter') {
+            search(inputSearch.value);
+        } else {
+            searchIcon.onclick = () => {search(inputSearch.value);};
+            if (searchIcon.classList.contains('lni-xmark')){ searchIcon.classList.remove('lni-xmark');};
+            searchIcon.classList.add('lni-search-1');
+        }
+    });
+
 });

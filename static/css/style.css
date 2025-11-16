@@ -1,3 +1,12 @@
+:root {
+    --light-grey: #333333;
+    --light-white: #DDDDDD;
+    --dark-black: #121212;
+    --dark-white: #BBBBBB;
+    --custom-background: var(--light-grey);
+    --custom-foreground: var(--dark-black);
+}
+
 * {
     border: 0;
     margin: 0;
@@ -5,58 +14,45 @@
     user-select: none;
 }
 
+
+html {
+    height: 100%;
+}
+
 body {
     width: 100%;
-    height: 100vh;
-    background-color: #333333;
+    height: 100%;
+    background-color: var(--custom-background);
 }
 
 header {
-    width: 100%;
-    height: 50px;
-    background-color: #121212;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     position: fixed;
-    z-index: 9999;
+    width: 100%;
     top: 0px;
+    z-index: 99;
 }
 
-select, option, button {
-    color: black;
+h1 {
+    font-size: 32px  !important;
+    font-weight: 600 !important;
 }
 
-select, select:focus {
-    outline: none;
-    background-color: #777777;
-    border-radius: 3px;
-    font-weight: 600
-
-}
-
-#settings-container {
-    position: absolute;
-    left: 2.5vw;
-    display: flex;
-    width: fit-content;
-    gap: 1vw;
-    font-size: 18px;
+select {
+    background-color: var(--custom-background) !important;
 }
 
 .container-landscape {
-    margin-top: 80px;
+    padding-top: calc(3vh + var(--bulma-navbar-height));
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
     height: 100%;
-    gap: 3vh;
+    background-color: var(--custom-background);
 }
 
 .container-grid {
-    margin-top: 80px;
+    padding-top: calc(3vh + var(--bulma-navbar-height));
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -64,7 +60,7 @@ select, select:focus {
     justify-content: space-around;
     width: 100%;
     height: 100%;
-    gap: 10px;
+    background-color: var(--custom-background);
 }
 
 .chart-container {
@@ -75,4 +71,35 @@ select, select:focus {
     width: fit-content;
     gap: 3vh;
     margin-bottom: 3vh;
+}
+
+#navbarBasicExample, .navbar-brand {
+    background-color: var(--dark-black) !important;
+}
+
+.navbar-start {
+    justify-content: space-around;
+    margin-left: 2.5vw;
+    gap: 10px;
+}
+
+.navbar-brand {
+    align-items: center !important;
+}
+
+.top-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  z-index: 999999;
+}
+
+.navbar-link {
+    width: 125px;
+}
+
+.subtitle-black {
+    color: black !important;
 }
