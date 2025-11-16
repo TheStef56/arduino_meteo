@@ -1,12 +1,13 @@
 const timeTable = {
-    "5m" : 300,
-    "30m": 1800,
-    "1h" : 3600,
-    "3h" : 10800,
-    "6h" : 21600,
-    "12h": 43200,
-    "1d" : 86400,
-    "7d" : 604800
+    "unfiltered" : 0,
+    "5m"         : 300,
+    "30m"        : 1800,
+    "1h"         : 3600,
+    "3h"         : 10800,
+    "6h"         : 21600,
+    "12h"        : 43200,
+    "1d"         : 86400,
+    "7d"         : 604800
 }
 
 function createChartById(id) {
@@ -28,16 +29,23 @@ function createChartById(id) {
     });
 }
 
-function changeTimeFrame(data, period, resolution) {
-    if (period == resolution) return data;
+function changeTimeFrame(data, period) {
+    if (period == 0) return data;
     const result = new Array();
-    const cumulative = new Array();   
+    const cumulative = new Array();
+    const treshold = 1.25;
+    let resolution = 0;
     let begin = 0;
-    data.forEach(entry => {
+    data.forEach((entry, idx) => {
+        if (idx != 0) resolution = entry[0] - data[idx - 1][0];
         if (begin == 0) {
             begin = entry[0]
-            cumulative.push(entry);
-        } else if (entry[0] - begin + resolution >= period) {
+        }
+        cumulative.push(entry);
+        if (entry[0] - begin + resolution*treshold>= period || idx == data.length - 1) {
+            console.log(entry[0])
+            console.log(begin)
+            console.log(resolution)
             let max = 0;
             let min = 9999999;
             cumulative.forEach(entry2 => {
@@ -58,8 +66,6 @@ function changeTimeFrame(data, period, resolution) {
             ]);
             cumulative.length = 0;
             begin = 0;
-        } else {
-            cumulative.push(entry);
         }
 
     });
@@ -86,7 +92,7 @@ function fetchData() {
         const bmpData           = new Array();
         const batteryData       = new Array();
         let dataArray = Array.from(data);
-        dataArray = changeTimeFrame(dataArray, period, timeTable["5m"]);
+        dataArray = changeTimeFrame(dataArray, period);
         dataArray.forEach(entry => {
             windSpeedData.push({time: entry[0], open: entry[1], close: entry[2], high: entry[3], low: entry[4]});
             windDirectionData.push({time: entry[0], value: (entry[9]-1)/8*360});
