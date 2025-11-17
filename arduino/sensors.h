@@ -1,3 +1,6 @@
+#include <Adafruit_BME280.h>
+#include "ledError.h"
+
 #ifndef SENSORS_H
 #define SENSORS_H
 
@@ -6,7 +9,6 @@
 
 #define READS 100
 
-#include <Adafruit_BME280.h>
 Adafruit_BME280 BME; // I2C interface
 
 typedef struct {
@@ -39,7 +41,9 @@ float getAnemometerVoltage() {
 void setupBme() {
   if (!BME.begin(0x76)) {  // Try 0x76 or 0x77 depending on the module
     IF_SERIAL_DEBUG(Serial.println("Could not find a valid BME280 sensor!"));
-    while (1);
+    while (1) {
+      ledPrint("BME280 setup error!");
+    };
   }
 }
 

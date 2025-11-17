@@ -5,7 +5,7 @@ from mydb import *
 from env import AES_KEY
 
 app = Flask(__name__)
-HOST = '0.0.0.0'
+HOST = '192.168.0.1'
 
 DATACHANGED = False
 

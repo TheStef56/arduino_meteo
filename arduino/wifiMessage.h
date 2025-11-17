@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ledError.h"
 #include <Crypto.h>
 #include <AES.h>
 #include <GCM.h>
@@ -40,6 +41,7 @@ void setupWifi() {
   int status = WiFi.status();
   while (status != WL_CONNECTED) {
     IF_SERIAL_DEBUG(Serial.print("Attempting to connect to SSID: "));
+    ledPrint("Attempting to connect to WIFI...");
     IF_SERIAL_DEBUG(Serial.println(WIFI_SSID));
     status = WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
     delay(5000);
@@ -48,20 +50,23 @@ void setupWifi() {
 }
 
 int sendWifiMessage(const char *ip, int port, uint8_t *message, size_t size) {
-  WiFiClient client;
-  
+begin:
+  WiFiClient client;  
   int res = client.connect(ip, port);
   if (res) {
     IF_SERIAL_DEBUG(Serial.println("Connected to socket!"));
+    ledPrint("Connection to socket!");
     client.write(message, size);
     client.stop();
     return 1;
   } else {
-    IF_SERIAL_DEBUG(Serial.print("Connection failed: "));
+    IF_SERIAL_DEBUG(Serial.print("Connection to socket failed: "));
     IF_SERIAL_DEBUG(Serial.println(res));
     IF_SERIAL_DEBUG(printWifiStatus());
+    ledPrint("Connection to socket failed!");
     shutDownWifi();
     setupWifi();
+    goto begin;
     return 0;
   }
 }

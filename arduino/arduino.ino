@@ -1,4 +1,4 @@
-// #define SERIAL_DEBUG
+#define SERIAL_DEBUG
 #include "common.h"
 #include "env.h"
 #include "wifiMessage.h"
