@@ -5,7 +5,7 @@ DB_LOCK = False
 
 TIME_FRAME = 5
 MAX_TIME_SPAN = 60*60*24*30
-MAX_SIZE = MAX_TIME_SPAN/TIME_FRAME*DATA_SIZE
+MAX_SIZE = int(MAX_TIME_SPAN*DATA_SIZE/TIME_FRAME)
 
 
 def check_for_lock():
@@ -26,7 +26,7 @@ def truncate_db_size():
                 new_size = int(((MAX_SIZE * 0.1)//DATA_SIZE)*DATA_SIZE)
                 data = data[old_size - new_size:]
         with open("database.bin", "wb") as db:
-            if len(data > 0):
+            if len(data) > 0:
                 db.write(data)
     except Exception as e:
         traceback.print_exception(e)
