@@ -7,7 +7,7 @@
 #define HOST "192.168.0.101"
 #define PORT 9000
 // 5 min
-#define INTERVAL 5*60*1000
+#define INTERVAL 5*1000
 
 void setup() {
   IF_SERIAL_DEBUG(
