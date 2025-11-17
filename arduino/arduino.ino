@@ -1,12 +1,13 @@
-#define SERIAL_DEBUG
+// #define SERIAL_DEBUG
 #include "common.h"
-
 #include "env.h"
 #include "wifiMessage.h"
 #include "sensors.h"
 
-#define HOST "192.168.0.154"
+#define HOST "192.168.0.101"
 #define PORT 9000
+// 5 min
+#define INTERVAL 5*60*1000
 
 void setup() {
   IF_SERIAL_DEBUG(
@@ -32,15 +33,8 @@ void loop() {
     .windDirection  = 1.f,
   });
 
-  // IF_SERIAL_DEBUG(Serial.println(getAnemometerVoltage()));
-  // IF_SERIAL_DEBUG(Serial.println(getBatteryVoltage()));
-  // getBMEdata();
-  delay(1000);
+  delay(INTERVAL);
 }
-
-
-
-
 
 void sendData(Data data) {
   int ret = sendWifiMessageEnc(HOST, PORT, (uint8_t*)(void*)&data, sizeof(Data), AES_KEY, sizeof(AES_KEY));
