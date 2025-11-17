@@ -79,9 +79,12 @@ select {
 
 #navbarBasicExample, .navbar-brand {
     background-color: var(--dark-black) !important;
+}
+
+.scrollable-navbar {
     overflow-y: scroll;
     max-height: 100vh;
-    scrollbar-width: none; /* Firefox */
+    scrollbar-width: none;
 }
 
 .navbar-end {
@@ -104,8 +107,6 @@ select {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  display: flex;
-  align-items: center;
   z-index: 999999;
   display: flex;
   align-items: center;

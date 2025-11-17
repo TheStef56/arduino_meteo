@@ -1,18 +1,21 @@
-let sizeFactor    = 0.95;
+let wSizeFactor    = 0.95;
+let hSizeFactor    = 0.3;
 let minChartWidth = 0;
 let maxChartWidth = 99999999;
+let minChartHeight = 300;
+let maxChartHeight = 99999999;
 let darkMode = true;
 let currentTimezoneOffset = 0;
 
 const plotArrangements = {
     "Landscape" : {
-        "factor"   : 0.95,
+        "wFactor"   : 0.95,
         "classList": ["container-landscape"],
         "minWidth" : 0,
         "maxWidth" : 99999999
     },
     "Grid": {
-        "factor"   : 0.35,
+        "wFactor"   : 0.35,
         "classList": ["container-grid"],
         "minWidth" : 300,
         "maxWidth" : 500,
@@ -63,8 +66,8 @@ const timeZones = {
 
 function createChartById(id) {
     return MyCharts.createChart(document.getElementById(id), {
-        width: window.innerWidth*sizeFactor, 
-        height: 300,
+        width: window.innerWidth*wSizeFactor, 
+        height: window.innerHeight*hSizeFactor,
         layout: {
             background: { color: '#121212' }, // chart background
             textColor: '#D1D4DC',             // axis + labels
@@ -194,12 +197,12 @@ setInterval(() => {
 }, 5000);
 
 window.addEventListener("resize", () => {
-    windSpeedChart.applyOptions     ({ width: Math.min(Math.max(window.innerWidth*sizeFactor, minChartWidth), maxChartWidth) });
-    windDirectionChart.applyOptions ({ width: Math.min(Math.max(window.innerWidth*sizeFactor, minChartWidth), maxChartWidth) });
-    temperatureChart.applyOptions   ({ width: Math.min(Math.max(window.innerWidth*sizeFactor, minChartWidth), maxChartWidth) });
-    humidityChart.applyOptions      ({ width: Math.min(Math.max(window.innerWidth*sizeFactor, minChartWidth), maxChartWidth) });
-    bmpChart.applyOptions           ({ width: Math.min(Math.max(window.innerWidth*sizeFactor, minChartWidth), maxChartWidth) });
-    batteryChart.applyOptions       ({ width: Math.min(Math.max(window.innerWidth*sizeFactor, minChartWidth), maxChartWidth) });
+    allCharts.forEach(chart => {
+        chart.applyOptions({ 
+            width : Math.min(Math.max(window.innerWidth*wSizeFactor , minChartWidth ), maxChartWidth),
+            height: Math.min(Math.max(window.innerHeight*hSizeFactor, minChartHeight), maxChartHeight)
+        });
+    });    
 });
 
 // UI callbacks ---------------------------------------------------------------------------
@@ -209,7 +212,7 @@ function changeArrangement() {
     const container     = document.getElementById("container");
     const arrangement   = plotArrangements[selector.innerText];
     container.classList = arrangement["classList"];
-    sizeFactor          = arrangement["factor"];
+    wSizeFactor          = arrangement["wFactor"];
     minChartWidth       = arrangement["minWidth"];
     maxChartWidth       = arrangement["maxWidth"];
     window.dispatchEvent(new Event('resize'));
@@ -288,6 +291,22 @@ document.addEventListener('DOMContentLoaded', () => {
             // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
             el.classList.toggle('is-active');
             $target.classList.toggle('is-active');
+            if (el.classList.contains("is-active")) {
+                document.getElementById('navbarBasicExample').classList.add("scrollable-navbar");
+            } else {
+                document.getElementById('navbarBasicExample').classList.remove("scrollable-navbar");
+            }
         });
+    });
+    window.addEventListener('resize', () => {
+        if (window.innerWidth >= 1431) {
+            $navbarBurgers.forEach( el => {
+                const target = el.dataset.target;
+                const $target = document.getElementById(target);
+                el.classList.toggle('is-active');
+                $target.classList.remove('is-active');
+                document.getElementById('navbarBasicExample').classList.remove("scrollable-navbar");
+            });
+        }
     });
 });
