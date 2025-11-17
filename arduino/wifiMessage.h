@@ -1,5 +1,4 @@
 #include "common.h"
-#include "ledError.h"
 #include <Crypto.h>
 #include <AES.h>
 #include <GCM.h>

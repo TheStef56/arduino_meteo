@@ -1,5 +1,4 @@
 #include <Adafruit_BME280.h>
-#include "ledError.h"
 
 #ifndef SENSORS_H
 #define SENSORS_H

@@ -1,4 +1,4 @@
-#define SERIAL_DEBUG
+// #define SERIAL_DEBUG
 #include "common.h"
 #include "env.h"
 #include "wifiMessage.h"
@@ -14,6 +14,7 @@ void setup() {
     Serial.begin(9600);
     while (!Serial);
   )
+  ledPrintInit();
   setupBme();
   setupWifi();
 }
