@@ -288,6 +288,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
             el.classList.toggle('is-active');
             $target.classList.toggle('is-active');
+            if (el.classList.contains("is-active")) {
+                document.querySelector("header").style.position = "relative";
+            } else {
+                document.querySelector("header").style.position = "fixed";
+            }
         });
     });
 });

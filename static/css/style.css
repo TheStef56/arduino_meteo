@@ -86,6 +86,13 @@ select {
     align-items: center !important;
 }
 
+.navbar-dropdown {
+    overflow-y: scroll;
+    max-height: 70vh;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE 10+ */
+}
+
 .top-center {
   position: absolute;
   left: 50%;
@@ -94,7 +101,6 @@ select {
   align-items: center;
   z-index: 999999;
 }
-
 
 .subtitle-black {
     color: black !important;
