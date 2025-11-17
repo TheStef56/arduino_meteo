@@ -3,10 +3,34 @@ import struct, time, traceback
 DATA_SIZE = 33 + 4 # 4 bytes of epoch
 DB_LOCK = False
 
+TIME_FRAME = 5
+MAX_TIME_SPAN = 60*60*24*30
+MAX_SIZE = MAX_TIME_SPAN/TIME_FRAME*DATA_SIZE
+
+
 def check_for_lock():
     global DB_LOCK
     while DB_LOCK:
         time.sleep(0.01)
+
+def truncate_db_size():
+    global DB_LOCK, MAX_SIZE, DATA_SIZE
+    check_for_lock()
+    DB_LOCK = True
+    data = []
+    try:
+        with open("database.bin", "rb") as db:
+            data = db.read()
+            old_size = len(data)
+            if  old_size > MAX_SIZE:
+                new_size = int(((MAX_SIZE * 0.1)//DATA_SIZE)*DATA_SIZE)
+                data = data[old_size - new_size:]
+        with open("database.bin", "wb") as db:
+            if len(data > 0):
+                db.write(data)
+    except Exception as e:
+        traceback.print_exception(e)
+    DB_LOCK = False
 
 def unpack_data(data):
     wind_speed_open  = struct.unpack('f', data[:4])[0]
@@ -38,6 +62,7 @@ def write_to_db(wind_speed_open, wind_speed_close, wind_speed_high, wind_speed_l
                 ):
     global DATA_SIZE, DB_LOCK
     check_for_lock()
+    truncate_db_size()
     DB_LOCK = True
     try:
         db = open("database.bin", "ab+")
