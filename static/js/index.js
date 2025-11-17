@@ -2,6 +2,22 @@ let sizeFactor    = 0.95;
 let minChartWidth = 0;
 let maxChartWidth = 99999999;
 let darkMode = true;
+let currentTimezoneOffset = 0;
+
+const plotArrangements = {
+    "Landscape" : {
+        "factor"   : 0.95,
+        "classList": ["container-landscape"],
+        "minWidth" : 0,
+        "maxWidth" : 99999999
+    },
+    "Grid": {
+        "factor"   : 0.35,
+        "classList": ["container-grid"],
+        "minWidth" : 300,
+        "maxWidth" : 500,
+    }
+}
 
 const timeTable = {
     "Unfiltered" : 0,
@@ -13,6 +29,36 @@ const timeTable = {
     "12h"        : 43200,
     "1d"         : 86400,
     "7d"         : 604800
+}
+
+const timeZones = {
+    "UTC-12 (BIT)": -12, 
+    "UTC-11 (SST)": -11, 
+    "UTC-10 (HST)": -10, 
+    "UTC-9 (AKST)": -9, 
+    "UTC-8 (PST)": -8, 
+    "UTC-7 (MST)": -7, 
+    "UTC-6 (CST)": -6, 
+    "UTC-5 (EST)": -5, 
+    "UTC-4 (AST)": -4, 
+    "UTC-3 (ART)": -3, 
+    "UTC-2 (GST)": -2, 
+    "UTC-1 (AZOT)": -1, 
+    "UTC-0 (GMT)": -0, 
+    "UTC+1 (CET)": +1, 
+    "UTC+2 (EET)": +2, 
+    "UTC+3 (MSK)": +3, 
+    "UTC+4 (GST)": +4, 
+    "UTC+5 (PKT)": +5, 
+    "UTC+6 (BST)": +6, 
+    "UTC+7 (ICT)": +7, 
+    "UTC+8 (CST)": +8, 
+    "UTC+9 (JST)": +9, 
+    "UTC+10 (AEST)": +10, 
+    "UTC+11 (SBT)": +11, 
+    "UTC+12 (NZST)": +12, 
+    "UTC+13 (TOT)": +13, 
+    "UTC+14 (LINT)": +14, 
 }
 
 function createChartById(id) {
@@ -32,6 +78,12 @@ function createChartById(id) {
             secondsVisible: false, // set to true if you want seconds
         },
     });
+}
+
+function changeTimezone(data) {
+    data.forEach((_, idx) => {
+        data[idx][0] = data[idx][0] + currentTimezoneOffset;
+    })
 }
 
 function changeTimeFrame(data, period) {
@@ -97,6 +149,7 @@ function fetchData() {
         const batteryData       = new Array();
         let dataArray = Array.from(data);
         dataArray = changeTimeFrame(dataArray, period);
+        changeTimezone(dataArray);
         dataArray.forEach(entry => {
             windSpeedData.push({time: entry[0], open: entry[1], close: entry[2], high: entry[3], low: entry[4]});
             windDirectionData.push({time: entry[0], value: (entry[9]-1)/8*360});
@@ -151,22 +204,6 @@ window.addEventListener("resize", () => {
 
 // UI callbacks ---------------------------------------------------------------------------
 
-const plotArrangements = {
-    "Landscape" : {
-        "factor"   : 0.95,
-        "classList": ["container-landscape"],
-        "minWidth" : 0,
-        "maxWidth" : 99999999
-    },
-    "Grid": {
-        "factor"   : 0.35,
-        "classList": ["container-grid"],
-        "minWidth" : 300,
-        "maxWidth" : 500,
-    }
-}
-
-
 function changeArrangement() {
     const selector      = document.getElementById("arrangement");
     const container     = document.getElementById("container");
@@ -178,7 +215,6 @@ function changeArrangement() {
     window.dispatchEvent(new Event('resize'));
 }
 
-
 function changeArrangementLabel(label) {
     document.getElementById("arrangement").innerText = label;
     changeArrangement();
@@ -186,6 +222,12 @@ function changeArrangementLabel(label) {
 
 function changeTimeFrameLabel(label) {
     document.getElementById("timeframe").innerText = label;
+    fetchData();
+}
+
+function changeTimezoneLabel(label) {
+    document.getElementById("timezone").innerText = label;
+    currentTimezoneOffset = timeZones[label]*3600;
     fetchData();
 }
 
@@ -248,26 +290,4 @@ document.addEventListener('DOMContentLoaded', () => {
             $target.classList.toggle('is-active');
         });
     });
-
-    const searchIcon = document.getElementById('search-icon');
-    const inputSearch = document.getElementById('search');
-
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('q')) {
-        searchIcon.onclick = () => {window.location.href = "/";};
-        inputSearch.value = params.get('q');
-    } else {
-        searchIcon.onclick = () => {search(inputSearch.value);};
-    }
-
-    inputSearch.addEventListener('keydown', (event) => {
-        if (event.key == 'Enter') {
-            search(inputSearch.value);
-        } else {
-            searchIcon.onclick = () => {search(inputSearch.value);};
-            if (searchIcon.classList.contains('lni-xmark')){ searchIcon.classList.remove('lni-xmark');};
-            searchIcon.classList.add('lni-search-1');
-        }
-    });
-
 });

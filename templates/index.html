@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meteo</title>
+    <title>Arduino Meteo</title>
     <script src="/static/js/chart.js"></script>
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="/static/css/bulma/css/bulma.min.css">
@@ -23,10 +23,10 @@
             </div>
 
             <div id="navbarBasicExample" class="navbar-menu">
-                <div class="navbar-start">
+                <div class="navbar-end">
                     <!-- Theme Dropdown -->
                     <div class="navbar-item has-dropdown is-hoverable">
-                        <a id="theme" class="navbar-link has-text-white">
+                        <a id="theme" class="navbar-link has-text-white" style="width: 125px;">
                             Dark
                         </a>
                         <div class="navbar-dropdown is-right">
@@ -37,7 +37,7 @@
                     
                     <!-- Timeframe Dropdown -->
                     <div class="navbar-item has-dropdown is-hoverable">
-                        <a id="timeframe" class="navbar-link has-text-white">Unfiltered</a>
+                        <a id="timeframe" class="navbar-link has-text-white" style="width: 125px;">Unfiltered</a>
                         <div class="navbar-dropdown is-right">
                             <a class="navbar-item has-text-white" onclick="changeTimeFrameLabel('Unfiltered')">Unfiltered</a>
                             <a class="navbar-item has-text-white" onclick="changeTimeFrameLabel('5m')">5m</a>
@@ -52,12 +52,47 @@
                     </div>
                     <!-- Arrangement Dropdown  -->
                     <div class="navbar-item has-dropdown is-hoverable">
-                        <a id="arrangement" class="navbar-link has-text-white">
+                        <a id="arrangement" class="navbar-link has-text-white" style="width: 130px;">
                             Landscape
                         </a>
                         <div class="navbar-dropdown is-right">
                             <a class="navbar-item has-text-white" onclick="changeArrangementLabel('Landscape')">Landscape</a>
                             <a class="navbar-item has-text-white" onclick="changeArrangementLabel('Grid')">Grid</a>
+                        </div>
+                    </div>
+                    <!-- Timezones Dropdown  -->
+                    <div class="navbar-item has-dropdown is-hoverable">
+                        <a id="timezone" class="navbar-link has-text-white" style="width: 160px;">
+                            UTC-0 (GMT)
+                        </a>
+                        <div class="navbar-dropdown is-right">
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC-12 (BIT)')">UTC-12 (BIT)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC-11 (SST)')">UTC-11 (SST)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC-10 (HST)')">UTC-10 (HST)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC-9 (AKST)')">UTC-9 (AKST)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC-8 (PST)')">UTC-8 (PST)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC-7 (MST)')">UTC-7 (MST)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC-6 (CST)')">UTC-6 (CST)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC-5 (EST)')">UTC-5 (EST)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC-4 (AST)')">UTC-4 (AST)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC-3 (ART)')">UTC-3 (ART)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC-2 (GST)')">UTC-2 (GST)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC-1 (AZOT)')">UTC-1 (AZOT)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC-0 (GMT)')">UTC-0 (GMT)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC+1 (CET)')">UTC+1 (CET)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC+2 (EET)')">UTC+2 (EET)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC+3 (MSK)')">UTC+3 (MSK)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC+4 (GST)')">UTC+4 (GST)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC+5 (PKT)')">UTC+5 (PKT)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC+6 (BST)')">UTC+6 (BST)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC+7 (ICT)')">UTC+7 (ICT)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC+8 (CST)')">UTC+8 (CST)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC+9 (JST)')">UTC+9 (JST)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC+10 (AEST)')">UTC+10 (AEST)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC+11 (SBT)')">UTC+11 (SBT)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC+12 (NZST)')">UTC+12 (NZST)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC+13 (TOT)')">UTC+13 (TOT)</a>
+                            <a class="navbar-item has-text-white" onclick="changeTimezoneLabel('UTC+14 (LINT)')">UTC+14 (LINT)</a>
                         </div>
                     </div>
                 </div>

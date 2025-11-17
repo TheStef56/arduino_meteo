@@ -77,9 +77,8 @@ select {
     background-color: var(--dark-black) !important;
 }
 
-.navbar-start {
-    justify-content: space-around;
-    margin-left: 2.5vw;
+.navbar-end {
+    justify-content: space-around !important;
     gap: 10px;
 }
 
@@ -96,9 +95,6 @@ select {
   z-index: 999999;
 }
 
-.navbar-link {
-    width: 125px;
-}
 
 .subtitle-black {
     color: black !important;
