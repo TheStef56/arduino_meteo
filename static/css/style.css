@@ -37,6 +37,10 @@ h1 {
     font-weight: 600 !important;
 }
 
+h2 {
+    font-size: 20px !important;
+}
+
 select {
     background-color: var(--custom-background) !important;
 }
@@ -75,6 +79,9 @@ select {
 
 #navbarBasicExample, .navbar-brand {
     background-color: var(--dark-black) !important;
+    overflow-y: scroll;
+    max-height: 100vh;
+    scrollbar-width: none; /* Firefox */
 }
 
 .navbar-end {
@@ -100,8 +107,31 @@ select {
   display: flex;
   align-items: center;
   z-index: 999999;
+  display: flex;
+  align-items: center;
+  height: var(--bulma-navbar-height);
 }
 
 .subtitle-black {
     color: black !important;
+}
+
+@media screen and (max-width: 440px) {
+    h1 {
+        font-size: 24px !important;
+    }
+
+    h2 {
+        font-size: 16px !important;
+    }
+}
+
+@media screen and (max-width: 330px) {
+    h1 {
+        font-size: 20px !important;
+    }
+
+    h2 {
+        font-size: 12px !important;
+    }
 }
