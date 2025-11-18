@@ -6,6 +6,7 @@ let minChartHeight = 300;
 let maxChartHeight = 99999999;
 let darkMode = true;
 let currentTimezoneOffset = 0;
+let currentArrangement = "Landscape";
 
 const plotArrangements = {
     "Landscape" : {
@@ -208,13 +209,14 @@ window.addEventListener("resize", () => {
 // UI callbacks ---------------------------------------------------------------------------
 
 function changeArrangement() {
-    const selector      = document.getElementById("arrangement");
-    const container     = document.getElementById("container");
-    const arrangement   = plotArrangements[selector.innerText];
-    container.classList = arrangement["classList"];
-    wSizeFactor          = arrangement["wFactor"];
-    minChartWidth       = arrangement["minWidth"];
-    maxChartWidth       = arrangement["maxWidth"];
+    const selector            = document.getElementById("arrangement");
+    const container           = document.getElementById("container");
+    const arrangement         = plotArrangements[selector.innerText];
+    currentArrangement        = selector.innerText;
+    container.classList       = arrangement["classList"];
+    wSizeFactor               = arrangement["wFactor"];
+    minChartWidth             = arrangement["minWidth"];
+    maxChartWidth             = arrangement["maxWidth"];
     window.dispatchEvent(new Event('resize'));
 }
 
@@ -275,38 +277,66 @@ function changeThemeLabel(label) {
     }
 }
 
+function expandChart(target) {
+    if (target.classList.contains("chart-expanded")) {
+        target.classList.remove("chart-expanded");
+        target.classList.add("chart-container");
+        hSizeFactor = 0.3;
+        wSizeFactor = plotArrangements[currentArrangement]["wFactor"];
+        maxChartWidth = plotArrangements[currentArrangement]["maxWidth"];
+    } else {
+        target.classList.remove("chart-container");
+        target.classList.add("chart-expanded");
+        hSizeFactor = 1;
+        wSizeFactor = 1;
+        maxChartWidth = 99999999999;
+    }
+    window.dispatchEvent(new Event('resize'));
+}
+
 //  Navbar stuff ---------------------------------------------------------------------------
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
     // Get all "navbar-burger" elements
-    const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+    const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll(".navbar-burger"), 0);
 
     // Add a click event on each of them
     $navbarBurgers.forEach( el => {
-        el.addEventListener('click', () => {
+        el.addEventListener("click", () => {
             // Get the target from the "data-target" attribute
             const target = el.dataset.target;
             const $target = document.getElementById(target);
 
             // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
-            el.classList.toggle('is-active');
-            $target.classList.toggle('is-active');
+            el.classList.toggle("is-active");
+            $target.classList.toggle("is-active");
             if (el.classList.contains("is-active")) {
-                document.getElementById('navbarBasicExample').classList.add("scrollable-navbar");
+                document.getElementById("navbarBasicExample").classList.add("scrollable-navbar");
             } else {
-                document.getElementById('navbarBasicExample').classList.remove("scrollable-navbar");
+                document.getElementById("navbarBasicExample").classList.remove("scrollable-navbar");
             }
         });
     });
-    window.addEventListener('resize', () => {
+
+    // resetting media screen navbar state to avoid bug
+
+    window.addEventListener("resize", () => {
         if (window.innerWidth >= 1431) {
             $navbarBurgers.forEach( el => {
                 const target = el.dataset.target;
                 const $target = document.getElementById(target);
-                el.classList.toggle('is-active');
-                $target.classList.remove('is-active');
-                document.getElementById('navbarBasicExample').classList.remove("scrollable-navbar");
+                el.classList.remove("is-active");
+                $target.classList.remove("is-active");
+                document.getElementById("navbarBasicExample").classList.remove("scrollable-navbar");
             });
         }
+    });
+
+    Array.from(document.querySelectorAll("canvas")).forEach(canvas => {
+        canvas.addEventListener("dblclick", (ev) => {
+            const target = ev.target.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement;
+            expandChart(target);
+            console.log(target);
+        })
     });
 });

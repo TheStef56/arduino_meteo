@@ -77,6 +77,24 @@ select {
     margin-bottom: 3vh;
 }
 
+.chart-expanded {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    z-index: 99999;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    background-color: var(--custom-background);
+}
+
+canvas {
+    transition: all 0.3s ease;
+}
+
 #navbarBasicExample, .navbar-brand {
     background-color: var(--dark-black) !important;
 }
