@@ -87,7 +87,7 @@ h2 {
     background-color: var(--custom-background);
 }
 
-canvas {
+canvas, table {
     transition: all 0.3s ease;
 }
 
@@ -111,6 +111,7 @@ canvas {
 }
 
 .navbar-dropdown {
+    background-color: var(--custom-background) !important;
     overflow-y: scroll;
     max-height: 70vh;
     scrollbar-width: none; /* Firefox */

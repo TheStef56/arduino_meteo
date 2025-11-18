@@ -24,6 +24,17 @@
 
             <div id="navbarBasicExample" class="navbar-menu">
                 <div class="navbar-end">
+                    <!-- Arrangement Dropdown  -->
+                    <div class="navbar-item has-dropdown is-hoverable">
+                        <a id="arrangement" class="navbar-link text-white" style="width: 130px;">
+                            Landscape
+                        </a>
+                        <div class="navbar-dropdown is-right">
+                            <a class="navbar-item text-white" onclick="changeArrangementLabel('Landscape')">Landscape</a>
+                            <a class="navbar-item text-white" onclick="changeArrangementLabel('Grid')">Grid</a>
+                        </div>
+                    </div>
+                    
                     <!-- Theme Dropdown -->
                     <div class="navbar-item has-dropdown is-hoverable">
                         <a id="theme" class="navbar-link text-white" style="width: 125px;">
@@ -50,20 +61,10 @@
                             <a class="navbar-item text-white" onclick="changeTimeFrameLabel('7d')">7d</a>
                         </div>
                     </div>
-                    <!-- Arrangement Dropdown  -->
-                    <div class="navbar-item has-dropdown is-hoverable">
-                        <a id="arrangement" class="navbar-link text-white" style="width: 130px;">
-                            Landscape
-                        </a>
-                        <div class="navbar-dropdown is-right">
-                            <a class="navbar-item text-white" onclick="changeArrangementLabel('Landscape')">Landscape</a>
-                            <a class="navbar-item text-white" onclick="changeArrangementLabel('Grid')">Grid</a>
-                        </div>
-                    </div>
                     <!-- Timezones Dropdown  -->
                     <div class="navbar-item has-dropdown is-hoverable">
                         <a id="timezone" class="navbar-link text-white" style="width: 160px;">
-                            UTC-0 (GMT)
+                            UTC+1 (CET)
                         </a>
                         <div class="navbar-dropdown is-right">
                             <a class="navbar-item text-white" onclick="changeTimezoneLabel('UTC-12 (BIT)')">UTC-12 (BIT)</a>

@@ -1,12 +1,12 @@
-let wSizeFactor    = 0.95;
-let hSizeFactor    = 0.3;
-let minChartWidth = 0;
-let maxChartWidth = 99999999;
-let minChartHeight = 300;
-let maxChartHeight = 99999999;
-let darkMode = true;
-let currentTimezoneOffset = 0;
-let currentArrangement = "Landscape";
+let wSizeFactor           = 0.95;
+let hSizeFactor           = 0.3;
+let minChartWidth         = 0;
+let maxChartWidth         = 99999999;
+let minChartHeight        = 300;
+let maxChartHeight        = 99999999;
+let darkMode              = true;
+let currentTimezoneOffset = 3600;
+let currentArrangement    = "Landscape";
 
 const plotArrangements = {
     "Landscape" : {
@@ -104,9 +104,6 @@ function changeTimeFrame(data, period) {
         }
         cumulative.push(entry);
         if (entry[0] - begin + resolution*treshold>= period || idx == data.length - 1) {
-            console.log(entry[0])
-            console.log(begin)
-            console.log(resolution)
             let max = 0;
             let min = 9999999;
             cumulative.forEach(entry2 => {
