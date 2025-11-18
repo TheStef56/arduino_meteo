@@ -5,6 +5,7 @@
     --dark-white: #BBBBBB;
     --custom-background: var(--light-grey);
     --custom-foreground: var(--dark-black);
+    --black-white: white;
 }
 
 * {
@@ -39,10 +40,6 @@ h1 {
 
 h2 {
     font-size: 20px !important;
-}
-
-select {
-    background-color: var(--custom-background) !important;
 }
 
 .container-landscape {
@@ -85,7 +82,6 @@ select {
     position: fixed;
     z-index: 99999;
     top: 0;
-    left: 0;
     height: 100vh;
     width: 100vw;
     background-color: var(--custom-background);
@@ -96,7 +92,7 @@ canvas {
 }
 
 #navbarBasicExample, .navbar-brand {
-    background-color: var(--dark-black) !important;
+    background-color: var(--custom-foreground) !important;
 }
 
 .scrollable-navbar {
@@ -131,9 +127,28 @@ canvas {
   height: var(--bulma-navbar-height);
 }
 
-.subtitle-black {
+.text-black {
     color: black !important;
 }
+
+.text-white {
+    color: white !important;
+}
+
+.navbar-item {
+    background-color: var(--custom-background) !important;
+}
+
+.navbar-link, .has-dropdown {
+    background-color: var(--custom-foreground) !important;
+}
+
+.navbar-burger span:nth-child(1),
+.navbar-burger span:nth-child(2),
+.navbar-burger span:nth-child(3) {
+    background-color: var(--black-white);
+}
+
 
 @media screen and (max-width: 440px) {
     h1 {

@@ -241,8 +241,10 @@ function changeThemeLabel(label) {
     if (label == "Light") {
         document.documentElement.style.setProperty('--custom-background', 'var(--light-white)');
         document.documentElement.style.setProperty('--custom-foreground', 'var(--dark-white)');
-        Array.from(document.getElementsByClassName("subtitle-white")).forEach(element => {
-            element.classList = ['subtitle-black'];
+        document.documentElement.style.setProperty('--black-white', 'black');
+        Array.from(document.getElementsByClassName("text-white")).forEach(element => {
+            element.classList.remove('text-white');
+            element.classList.add('text-black');
         })
         allCharts.forEach(chart => {
             chart.applyOptions({
@@ -259,8 +261,10 @@ function changeThemeLabel(label) {
     } else if (label == "Dark") {
         document.documentElement.style.setProperty('--custom-background', 'var(--light-grey)');
         document.documentElement.style.setProperty('--custom-foreground', 'var(--dark-black)');
-        Array.from(document.getElementsByClassName("subtitle-black")).forEach(element => {
-            element.classList = ['subtitle-white'];
+        document.documentElement.style.setProperty('--black-white', 'white');
+        Array.from(document.getElementsByClassName("text-black")).forEach(element => {
+            element.classList.remove('text-black');
+            element.classList.add('text-white');
         })
         allCharts.forEach(chart => {
             chart.applyOptions({
@@ -287,7 +291,7 @@ function expandChart(target) {
     } else {
         target.classList.remove("chart-container");
         target.classList.add("chart-expanded");
-        hSizeFactor = 1;
+        hSizeFactor = 0.97;
         wSizeFactor = 1;
         maxChartWidth = 99999999999;
     }
