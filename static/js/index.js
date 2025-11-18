@@ -331,12 +331,22 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
     });
-
+    let lastTap = 0;
     Array.from(document.querySelectorAll("canvas")).forEach(canvas => {
-        canvas.addEventListener("dblclick", (ev) => {
+        const callback = (ev) => {
             const target = ev.target.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement;
             expandChart(target);
-            console.log(target);
-        })
+        }
+        canvas.addEventListener("dblclick", callback);
+        canvas.addEventListener("touchend", (evnt) => {
+            const now = Date.now();
+            const timeDiff = now - lastTap;
+
+            if (timeDiff < 300 && timeDiff > 0) {
+                callback(evnt)
+            }
+
+            if (evnt.touches.length == 0) lastTap = now;
+        });
     });
 });
