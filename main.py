@@ -11,6 +11,58 @@ WEB_PORT = 5000
 
 DATACHANGED = False
 
+themes = [
+    "Light",
+    "Dark"
+]
+
+arrangements = [
+    "Landscape",
+    "Grid"
+]
+
+time_frames = [
+    "Unfiltered",
+    "5m",
+    "30m",
+    "1h",
+    "3h",
+    "6h",
+    "12h",
+    "1d",
+    "7d",
+]
+
+time_zones = [
+    "UTC-12 (B|IT)",
+    "UTC-11 (SST)",
+    "UTC-10 (HST)",
+    "UTC-9 (AKST)",
+    "UTC-8 (PST)",
+    "UTC-7 (MST)",
+    "UTC-6 (CST)",
+    "UTC-5 (EST)",
+    "UTC-4 (AST)",
+    "UTC-3 (ART)",
+    "UTC-2 (GST)",
+    "UTC-1 (AZOT)",
+    "UTC-0 (GMT)",
+    "UTC+1 (CET)",
+    "UTC+2 (EET)",
+    "UTC+3 (MSK)",
+    "UTC+4 (GST)",
+    "UTC+5 (PKT)",
+    "UTC+6 (BST)",
+    "UTC+7 (ICT)",
+    "UTC+8 (CST)",
+    "UTC+9 (JST)",
+    "UTC+10 (AEST)",
+    "UTC+11 (SBT)",
+    "UTC+12 (NZST)",
+    "UTC+13 (TOT)",
+    "UTC+14 (LINT)"
+]
+
 def socket_listener():
     global DATACHANGED
     while True:
@@ -67,8 +119,11 @@ def socket_listener():
                 pass
 
 @app.route('/')
-def home():
-    return render_template("index.html")
+def home(): 
+    return render_template("index.html", themes       = themes,
+                                         arrangements = arrangements,
+                                         time_frames  = time_frames,
+                                         time_zones   = time_zones)
 
 @app.route('/data')
 def data():
