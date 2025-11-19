@@ -18,7 +18,7 @@ const plotArrangements = {
     "Grid": {
         "wFactor"   : 0.35,
         "classList": ["container-grid"],
-        "minWidth" : 300,
+        "minWidth" : 150,
         "maxWidth" : 500,
     }
 }
