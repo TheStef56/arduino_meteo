@@ -7,6 +7,7 @@ let minChartHeight        = 300;
 let darkMode              = true;
 let currentTimezoneOffset = 3600;
 let currentArrangement    = "Landscape";
+let localData             = [];
 
 const plotArrangements = {
     "Landscape" : {
@@ -130,10 +131,21 @@ function changeTimeFrame(data, period) {
     return result;
 }
 
-function fetchData() {
+function updateCharts() {
     const timeframeValue = document.getElementById("timeframe").innerText;
     const period = timeTable[timeframeValue];
+    let dataArray = Array.from(localData);
+    dataArray = changeTimeFrame(dataArray, period);
+    changeTimezone(dataArray);
+    windSpeedSeries.setData    (dataArray.map((entry) => {return {time: entry[0], open: entry[1], close: entry[2], high: entry[3], low: entry[4]}}));
+    windDirectionSeries.setData(dataArray.map((entry) => {return {time: entry[0], value: (entry[9]-1)/8*360}}));
+    temperatureSeries.setData  (dataArray.map((entry) => {return {time: entry[0], value: entry[5]}}));
+    humiditySeries.setData     (dataArray.map((entry) => {return {time: entry[0], value: entry[6]}}));
+    bmpSeries.setData          (dataArray.map((entry) => {return {time: entry[0], value: entry[7]}}));
+    batterySeries.setData      (dataArray.map((entry) => {return {time: entry[0], value: entry[8]}}));
+}
 
+function fetchData() {
     fetch("/data", {
         method: "GET",
         headers: {
@@ -142,29 +154,8 @@ function fetchData() {
     })
     .then(response => response.json())
     .then(data => {
-        const windSpeedData     = new Array();
-        const windDirectionData = new Array();
-        const temperatureData   = new Array();
-        const humidityData      = new Array();
-        const bmpData           = new Array();
-        const batteryData       = new Array();
-        let dataArray = Array.from(data);
-        dataArray = changeTimeFrame(dataArray, period);
-        changeTimezone(dataArray);
-        dataArray.forEach(entry => {
-            windSpeedData.push({time: entry[0], open: entry[1], close: entry[2], high: entry[3], low: entry[4]});
-            windDirectionData.push({time: entry[0], value: (entry[9]-1)/8*360});
-            temperatureData.push  ({time: entry[0], value: entry[5]});
-            humidityData.push     ({time: entry[0], value: entry[6]});
-            bmpData.push          ({time: entry[0], value: entry[7]});
-            batteryData.push      ({time: entry[0], value: entry[8]});
-        });
-        windSpeedSeries.setData    (windSpeedData);
-        windDirectionSeries.setData(windDirectionData);
-        temperatureSeries.setData  (temperatureData);
-        bmpSeries.setData          (bmpData);
-        humiditySeries.setData     (humidityData);
-        batterySeries.setData      (batteryData);
+        localData = data;
+        updateCharts();
     });
 }
 
@@ -224,13 +215,13 @@ function changeArrangementLabel(label) {
 
 function changeTimeFrameLabel(label) {
     document.getElementById("timeframe").innerText = label;
-    fetchData();
+    updateCharts();
 }
 
 function changeTimezoneLabel(label) {
     document.getElementById("timezone").innerText = label;
     currentTimezoneOffset = timeZones[label]*3600;
-    fetchData();
+    updateCharts();
 }
 
 function changeThemeLabel(label) {

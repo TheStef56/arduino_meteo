@@ -41,7 +41,7 @@
                     <!-- Theme Dropdown -->
                     <div class="navbar-item has-dropdown is-hoverable">
                         <a id="theme" class="navbar-link text-white" style="width: 125px;">
-                            {{ themes[0] }}
+                            {{ themes[1] }}
                         </a>
                         <div class="navbar-dropdown is-right">
                             {% for theme in themes %}
@@ -57,7 +57,7 @@
                         </a>
                         <div class="navbar-dropdown is-right">
                             {% for time_frame in time_frames %}
-                            <a class="navbar-item text-white" onclick="changeTimeFrameLabel('time_frame')">{{ time_frame }}</a>
+                            <a class="navbar-item text-white" onclick="changeTimeFrameLabel('{{ time_frame }}')">{{ time_frame }}</a>
                             {% endfor %}
                         </div>
                     </div>
