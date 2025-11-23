@@ -41,7 +41,7 @@ void setupBme() {
   if (!BME.begin(0x76)) {  // Try 0x76 or 0x77 depending on the module
     IF_SERIAL_DEBUG(Serial.println("Could not find a valid BME280 sensor!"));
     while (1) {
-      ledPrint("BME280 setup error!");
+      ledPrint("    BME280 setup error!", true);
     };
   }
 }

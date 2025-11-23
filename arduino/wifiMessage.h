@@ -29,18 +29,21 @@ void shutDownWifi() {
 void setupWifi() {
   if (WiFi.status() == WL_NO_MODULE) {
     IF_SERIAL_DEBUG(Serial.println("Communication with WiFi module failed!"));
-    while (true);
+    while (true) {
+      ledPrint("    Communication with WiFi module failed!", true);
+    };
   }
 
   String fv = WiFi.firmwareVersion();
   if (fv < WIFI_FIRMWARE_LATEST_VERSION) {
     IF_SERIAL_DEBUG(Serial.println("Please upgrade the firmware"));
+    ledPrint("    Please upgrade the firmware", true);
   }
 
   int status = WiFi.status();
   while (status != WL_CONNECTED) {
     IF_SERIAL_DEBUG(Serial.print("Attempting to connect to SSID: "));
-    ledPrint("Attempting to connect to WIFI...");
+    IF_LED_DEBUG(ledPrint("    Attempting to connect to WIFI...", true));
     IF_SERIAL_DEBUG(Serial.println(WIFI_SSID));
     status = WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
     delay(5000);
@@ -49,24 +52,23 @@ void setupWifi() {
 }
 
 int sendWifiMessage(const char *ip, int port, uint8_t *message, size_t size) {
-begin:
-  WiFiClient client;  
-  int res = client.connect(ip, port);
-  if (res) {
-    IF_SERIAL_DEBUG(Serial.println("Connected to socket!"));
-    ledPrint("Connection to socket!");
-    client.write(message, size);
-    client.stop();
-    return 1;
-  } else {
-    IF_SERIAL_DEBUG(Serial.print("Connection to socket failed: "));
-    IF_SERIAL_DEBUG(Serial.println(res));
-    IF_SERIAL_DEBUG(printWifiStatus());
-    ledPrint("Connection to socket failed!");
-    shutDownWifi();
-    setupWifi();
-    goto begin;
-    return 0;
+  while (1) {  
+    WiFiClient client;  
+    int res = client.connect(ip, port);
+    if (res) {
+      IF_SERIAL_DEBUG(Serial.println("Connected to socket!"));
+      IF_LED_DEBUG(ledPrint("    Connection to socket!", true));
+      client.write(message, size);
+      client.stop();
+      return 1;
+    } else {
+      IF_SERIAL_DEBUG(Serial.print("Connection to socket failed: "));
+      IF_SERIAL_DEBUG(Serial.println(res));
+      IF_SERIAL_DEBUG(printWifiStatus());
+      IF_LED_DEBUG(ledPrint("    Connection to socket failed!", true));
+      shutDownWifi();
+      setupWifi();
+    }
   }
 }
 

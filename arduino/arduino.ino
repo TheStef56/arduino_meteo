@@ -15,6 +15,7 @@ void setup() {
     while (!Serial);
   )
   ledPrintInit();
+  selectMode(5000);
   setupBme();
   setupWifi();
 }
