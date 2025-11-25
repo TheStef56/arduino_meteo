@@ -11,11 +11,12 @@
 
 void setup() {
   IF_SERIAL_DEBUG(
+    
     Serial.begin(9600);
     while (!Serial);
   )
   ledPrintInit();
-  selectMode(5000);
+  selectMode(5000, 300);
   setupBme();
   setupWifi();
 }
@@ -34,7 +35,6 @@ void loop() {
     .batteryVolts   = getBatteryVoltage(),
     .windDirection  = 1.f,
   });
-
   delay(INTERVAL);
 }
 

@@ -5,7 +5,6 @@
 #include <ArduinoGraphics.h>
 #include <Arduino_LED_Matrix.h>
 
-
 #ifdef SERIAL_DEBUG
   #define IF_SERIAL_DEBUG(serial) serial
 #else
@@ -32,11 +31,6 @@ typedef enum {
   WIFI_NO_LED_DEBUG,
   MODE_LENGTH
 } Mode;
-
-const char* MODES_TEXT[] = {
-  "WIFI_LED_DEBUG",
-  "WIFI_NO_LED_DEBUG"
-};
 
 const char* MODES_CODE[] = {
   "M1",
@@ -66,14 +60,24 @@ void ledPrint(const char *text, bool scroll) {
   LED_MATRIX.endDraw();
 }
 
-void selectMode(unsigned long waitTime) {
-  unsigned long startTime = millis();
+void selectMode(uint32_t waitTime, uint32_t blinkInterval) {
+  uint32_t startTime = millis();
   Mode mode = WIFI_LED_DEBUG;
   pinMode(MODE_SELECT_PIN, INPUT_PULLUP);
 
-  while (millis() - startTime < waitTime){
-    char buf[64] = {0};
-    ledPrint(MODES_CODE[(int)mode], false);
+  while (millis() - startTime < waitTime + blinkInterval*8){
+    uint32_t remainingTime =  waitTime - (millis() - startTime);
+    if (
+      (remainingTime > blinkInterval*8)                                    ||
+      (remainingTime < blinkInterval*8 && remainingTime > blinkInterval*7) ||
+      (remainingTime < blinkInterval*6 && remainingTime > blinkInterval*5) ||
+      (remainingTime < blinkInterval*4 && remainingTime > blinkInterval*3) ||
+      (remainingTime < blinkInterval*2 && remainingTime > blinkInterval*1)
+    ) {
+      ledPrint(MODES_CODE[(int)mode], false);
+    } else {
+      ledPrint("    ", false);
+    }
     if (!digitalRead(MODE_SELECT_PIN)) {
       mode = (Mode)(((int)mode+1)%(int)MODE_LENGTH);
       ledPrint(MODES_CODE[(int)mode], false);
@@ -81,9 +85,6 @@ void selectMode(unsigned long waitTime) {
       startTime = millis();
     }
   }
-  const char buff[64] = {0};
-  sprintf((char*)(void*)&buff, "    MODE: %s", MODES_TEXT[(int)mode]);
-  ledPrint((char*)(void*)&buff, true);
   MODE = mode;
   pinMode(MODE_SELECT_PIN, INPUT);
 }
