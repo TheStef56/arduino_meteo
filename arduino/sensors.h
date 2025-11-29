@@ -3,8 +3,9 @@
 #ifndef SENSORS_H
 #define SENSORS_H
 
-#define ANEMOMETER_ANALOG 0
-#define BATTERY_ANALOG 1
+#define WIND_DIR_ANALOG 5
+#define ANEMOMETER_ANALOG 4
+#define BATTERY_ANALOG 0
 
 #define READS 100
 
@@ -16,7 +17,7 @@ typedef struct {
   float bmp;
 } BMEData;
 
-float getBatteryVoltage() {
+float denoisedAnalogRead(int pin) {
   int minVal = 1024, maxVal = -1;
   long sum = 0;
   for (int i = 0; i < READS; ++i) {
@@ -29,13 +30,12 @@ float getBatteryVoltage() {
   sum -= minVal;
   sum -= maxVal; // remove one highest and one lowest
   float avg = sum / float(READS - 2);
-  return avg * 50.0f / 1023.0f;
+  return avg;
 }
 
-float getAnemometerVoltage() {
-  int value = analogRead(ANEMOMETER_ANALOG);
-  return value*5.0f/1023.0f;
-}
+#define getBatteryVoltage() denoisedAnalogRead(BATTERY_ANALOG)*50/1023.0f
+#define getWindDirectionDegrees() denoisedAnalogRead(WIND_DIR_ANALOG)*360/1023.0f
+#define getWindSpeedKmH() denoisedAnalogRead(ANEMOMETER_ANALOG)*252/1023.0f
 
 void setupBme() {
   if (!BME.begin(0x76)) {  // Try 0x76 or 0x77 depending on the module

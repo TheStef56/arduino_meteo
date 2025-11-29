@@ -27,7 +27,7 @@ def write_to_db(now,
         data += struct.pack('f', humidity)
         data += struct.pack('f', bmp)
         data += struct.pack('f', battery)
-        data.append(wind_dir)
+        data += struct.pack('f', wind_dir)
         db.write(data)
         db.close()
     except Exception as e:
@@ -48,5 +48,5 @@ for x in range(times):
         humidity         = random.random()*100,
         bmp              = random.random()*12 + 1012,
         battery          = random.random()*3 + 11, 
-        wind_dir         = random.randint(1, 8)
+        wind_dir         = random.random()*360
     )

@@ -138,11 +138,11 @@ function updateCharts() {
     dataArray = changeTimeFrame(dataArray, period);
     changeTimezone(dataArray);
     windSpeedSeries.setData    (dataArray.map((entry) => {return {time: entry[0], open: entry[1], close: entry[2], high: entry[3], low: entry[4]}}));
-    windDirectionSeries.setData(dataArray.map((entry) => {return {time: entry[0], value: (entry[9]-1)/8*360}}));
     temperatureSeries.setData  (dataArray.map((entry) => {return {time: entry[0], value: entry[5]}}));
     humiditySeries.setData     (dataArray.map((entry) => {return {time: entry[0], value: entry[6]}}));
     bmpSeries.setData          (dataArray.map((entry) => {return {time: entry[0], value: entry[7]}}));
     batterySeries.setData      (dataArray.map((entry) => {return {time: entry[0], value: entry[8]}}));
+    windDirectionSeries.setData(dataArray.map((entry) => {return {time: entry[0], value: entry[9]}}));
 }
 
 function fetchData() {

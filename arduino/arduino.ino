@@ -11,7 +11,6 @@
 
 void setup() {
   IF_SERIAL_DEBUG(
-    
     Serial.begin(9600);
     while (!Serial);
   )
@@ -25,15 +24,15 @@ void loop() {
   BMEData bme = getBMEdata();
   sendData(
     (Data){
-    .windSpeedOpen  = 0.f,//7.3f,
-    .windSpeedClose = 0.f,//9.3f,
-    .windSpeedHigh  = 0.f,//10.3f,
-    .windSpeedLow   = 0.f,//6.3f,
+    .windSpeedOpen  = getWindSpeedKmH(),//7.3f,
+    .windSpeedClose = getWindSpeedKmH(),//9.3f,
+    .windSpeedHigh  = getWindSpeedKmH(),//10.3f,
+    .windSpeedLow   = getWindSpeedKmH(),//6.3f,
     .temperature    = bme.temperature,//30.2f,
     .humidity       = bme.humidity,//90.5f,
     .bmp            = bme.bmp,//1019.0f,
     .batteryVolts   = getBatteryVoltage(),
-    .windDirection  = 1.f,
+    .windDirection  = getWindDirectionDegrees(),
   });
   delay(INTERVAL);
 }

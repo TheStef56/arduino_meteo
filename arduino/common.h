@@ -23,7 +23,7 @@ typedef struct {
   float humidity;
   float bmp;
   float batteryVolts;
-  byte windDirection;
+  float windDirection;
 } Data;
 
 typedef enum {

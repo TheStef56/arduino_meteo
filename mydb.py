@@ -1,6 +1,6 @@
 import struct, time, traceback
 
-DATA_SIZE = 33 + 4 # 4 bytes of epoch
+DATA_SIZE = 36 + 4 # 4 bytes of epoch
 DB_LOCK = False
 
 TIME_FRAME = 5
@@ -41,7 +41,7 @@ def unpack_data(data):
     humidity         = struct.unpack('f', data[20:24])[0]
     bmp              = struct.unpack('f', data[24:28])[0]
     battery          = struct.unpack('f', data[28:32])[0]
-    wind_dir         = data[32]
+    wind_dir         = struct.unpack('f', data[32:36])[0]
     return (wind_speed_open,
             wind_speed_close,
             wind_speed_high,
@@ -81,7 +81,7 @@ def write_to_db(wind_speed_open, wind_speed_close, wind_speed_high, wind_speed_l
         data += struct.pack('f', humidity)
         data += struct.pack('f', bmp)
         data += struct.pack('f', battery)
-        data.append(wind_dir)
+        data += struct.pack('f', wind_dir)
         db.write(data)
         db.close()
     except Exception as e:
