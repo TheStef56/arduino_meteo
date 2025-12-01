@@ -1,3 +1,6 @@
+#ifndef WIFI_MESSAGE_H
+#define WIFI_MESSAGE_H
+
 #include "common.h"
 #include <Crypto.h>
 #include <AES.h>
@@ -73,8 +76,7 @@ int sendWifiMessage(const char *ip, int port, uint8_t *message, size_t size) {
 }
 
 int sendWifiMessageEnc(const char *ip, int port, uint8_t *message, size_t size, uint8_t *aes_key, size_t aes_size) {
-  AES128 aes;          // AES-128 (16-byte key)
-  GCM<AES128> gcm;     // GCM mode
+  GCM<AES256> gcm;     // GCM mode
   
   uint8_t nonce[12];
   uint8_t authTag[16];
@@ -96,3 +98,5 @@ int sendWifiMessageEnc(const char *ip, int port, uint8_t *message, size_t size, 
 
   return sendWifiMessage(ip, port, (byte*)(void*)&fullPayload, sizeof(fullPayload));
 }
+
+#endif // WIFI_MESSAGE_H

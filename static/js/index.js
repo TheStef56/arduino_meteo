@@ -138,11 +138,12 @@ function updateCharts() {
     dataArray = changeTimeFrame(dataArray, period);
     changeTimezone(dataArray);
     windSpeedSeries.setData    (dataArray.map((entry) => {return {time: entry[0], open: entry[1], close: entry[2], high: entry[3], low: entry[4]}}));
-    temperatureSeries.setData  (dataArray.map((entry) => {return {time: entry[0], value: entry[5]}}));
-    humiditySeries.setData     (dataArray.map((entry) => {return {time: entry[0], value: entry[6]}}));
-    bmpSeries.setData          (dataArray.map((entry) => {return {time: entry[0], value: entry[7]}}));
-    batterySeries.setData      (dataArray.map((entry) => {return {time: entry[0], value: entry[8]}}));
-    windDirectionSeries.setData(dataArray.map((entry) => {return {time: entry[0], value: entry[9]}}));
+    windMeanSpeedSeries.setData(dataArray.map((entry) => {return {time: entry[0], value: entry[5]}}));
+    temperatureSeries.setData  (dataArray.map((entry) => {return {time: entry[0], value: entry[6]}}));
+    humiditySeries.setData     (dataArray.map((entry) => {return {time: entry[0], value: entry[7]}}));
+    bmpSeries.setData          (dataArray.map((entry) => {return {time: entry[0], value: entry[8]}}));
+    batterySeries.setData      (dataArray.map((entry) => {return {time: entry[0], value: entry[9]}}));
+    windDirectionSeries.setData(dataArray.map((entry) => {return {time: entry[0], value: entry[10]}}));
 }
 
 function fetchData() {
@@ -169,6 +170,7 @@ const batteryChart       = createChartById('battery-chart');
 const allCharts = [ windSpeedChart, windDirectionChart, temperatureChart, humidityChart, bmpChart, batteryChart]
 
 const windSpeedSeries     = windSpeedChart.addSeries     (MyCharts.CandlestickSeries);
+const windMeanSpeedSeries = windSpeedChart.addSeries     (MyCharts.LineSeries);
 const windDirectionSeries = windDirectionChart.addSeries (MyCharts.LineSeries);
 const temperatureSeries   = temperatureChart.addSeries   (MyCharts.LineSeries);
 const humiditySeries      = humidityChart.addSeries      (MyCharts.LineSeries);

@@ -1,6 +1,6 @@
 import struct, time, traceback
 
-DATA_SIZE = 36 + 4 # 4 bytes of epoch
+DATA_SIZE = 40 + 4 # 4 bytes of epoch
 DB_LOCK = False
 
 TIME_FRAME = 5
@@ -37,15 +37,17 @@ def unpack_data(data):
     wind_speed_close = struct.unpack('f', data[4:8])[0]
     wind_speed_high  = struct.unpack('f', data[8:12])[0]
     wind_speed_low   = struct.unpack('f', data[12:16])[0]
-    temperature      = struct.unpack('f', data[16:20])[0]
-    humidity         = struct.unpack('f', data[20:24])[0]
-    bmp              = struct.unpack('f', data[24:28])[0]
-    battery          = struct.unpack('f', data[28:32])[0]
-    wind_dir         = struct.unpack('f', data[32:36])[0]
+    wind_mean        = struct.unpack('f', data[16:20])[0]
+    temperature      = struct.unpack('f', data[20:24])[0]
+    humidity         = struct.unpack('f', data[24:28])[0]
+    bmp              = struct.unpack('f', data[28:32])[0]
+    battery          = struct.unpack('f', data[32:36])[0]
+    wind_dir         = struct.unpack('f', data[36:40])[0]
     return (wind_speed_open,
             wind_speed_close,
             wind_speed_high,
             wind_speed_low,
+            wind_mean,
             temperature,
             humidity,
             bmp,
@@ -53,7 +55,7 @@ def unpack_data(data):
             wind_dir)
 
                 
-def write_to_db(wind_speed_open, wind_speed_close, wind_speed_high, wind_speed_low,
+def write_to_db(wind_speed_open, wind_speed_close, wind_speed_high, wind_speed_low, wind_mean,
                 temperature,
                 humidity,
                 bmp,
@@ -77,6 +79,7 @@ def write_to_db(wind_speed_open, wind_speed_close, wind_speed_high, wind_speed_l
         data += struct.pack('f', wind_speed_close)
         data += struct.pack('f', wind_speed_high)
         data += struct.pack('f', wind_speed_low)
+        data += struct.pack('f', wind_mean)
         data += struct.pack('f', temperature)
         data += struct.pack('f', humidity)
         data += struct.pack('f', bmp)
@@ -110,6 +113,7 @@ def read_from_db():
                 wind_speed_close,
                 wind_speed_high,
                 wind_speed_low,
+                wind_mean,
                 temperature,
                 humidity,
                 bmp,
@@ -117,7 +121,7 @@ def read_from_db():
                 wind_dir) = unpack_data(window)
                 result.append([
                     epoch,
-                    wind_speed_open, wind_speed_close, wind_speed_high, wind_speed_low,
+                    wind_speed_open, wind_speed_close, wind_speed_high, wind_speed_low, wind_mean,
                     temperature,
                     humidity,
                     bmp,

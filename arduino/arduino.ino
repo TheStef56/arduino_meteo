@@ -4,37 +4,61 @@
 #include "wifiMessage.h"
 #include "sensors.h"
 
-#define HOST "192.168.0.101"
+#define HOST "192.168.0.154"
 #define PORT 9000
-// 5 min
-#define INTERVAL 5*1000
+
+#define WIND_MEASURING_INTERVAL 5*1000 // 5 sec
+#define DATA_SENDING_INTERVAL 5*60*1000 // 5 min
+static_assert(WIND_MEASURING_INTERVAL < DATA_SENDING_INTERVAL);
+
+size_t count = 0;
+float windMean = 0.f;
+float windOpen = 0.f;
+float windMax = 0.f;
+float windMin = 9999.f;
 
 void setup() {
+  ledPrintInit();
   IF_SERIAL_DEBUG(
     Serial.begin(9600);
-    while (!Serial);
+    while (!Serial) {
+      ledPrint("SERIAL FAIL", true);
+    };
   )
-  ledPrintInit();
-  selectMode(5000, 300);
   setupBme();
+  selectMode(5000, 300);
   setupWifi();
 }
 
 void loop() {
-  BMEData bme = getBMEdata();
-  sendData(
-    (Data){
-    .windSpeedOpen  = getWindSpeedKmH(),//7.3f,
-    .windSpeedClose = getWindSpeedKmH(),//9.3f,
-    .windSpeedHigh  = getWindSpeedKmH(),//10.3f,
-    .windSpeedLow   = getWindSpeedKmH(),//6.3f,
-    .temperature    = bme.temperature,//30.2f,
-    .humidity       = bme.humidity,//90.5f,
-    .bmp            = bme.bmp,//1019.0f,
-    .batteryVolts   = getBatteryVoltage(),
-    .windDirection  = getWindDirectionDegrees(),
-  });
-  delay(INTERVAL);
+  if (count*WIND_MEASURING_INTERVAL > DATA_SENDING_INTERVAL) {
+    BMEData bme = getBMEdata();
+    sendData(
+      (Data){
+      .windSpeedOpen  = windOpen,
+      .windSpeedClose = getWindSpeedKmH(),
+      .windSpeedHigh  = windMax,
+      .windSpeedLow   = windMin,
+      .windMean       = (float)windMean/count,
+      .temperature    = bme.temperature,
+      .humidity       = bme.humidity,
+      .bmp            = bme.bmp,
+      .batteryVolts   = getBatteryVoltage(),
+      .windDirection  = getWindDirectionDegrees(),
+    });
+    count    = 0;
+    windMean = 0.f;
+    windOpen = 0.f;
+    windMax  = 0.f;
+    windMin  = 9999.f;
+  }
+  float wSpeed = getWindSpeedKmH();
+  windMean += wSpeed;
+  if (wSpeed > windMax) windMax  = wSpeed;
+  if (wSpeed < windMin) windMin  = wSpeed;
+  if (count == 0) windOpen       = wSpeed;
+  delay(WIND_MEASURING_INTERVAL);
+  count++;
 }
 
 void sendData(Data data) {

@@ -1,15 +1,14 @@
-#include <Adafruit_BME280.h>
-
 #ifndef SENSORS_H
 #define SENSORS_H
+#include "SoftI2C_BME280.h"
 
-#define WIND_DIR_ANALOG 5
-#define ANEMOMETER_ANALOG 4
-#define BATTERY_ANALOG 0
+#define BATTERY_ANALOG A0
+#define WIND_DIR_ANALOG A5
+#define ANEMOMETER_ANALOG A4
 
 #define READS 100
 
-Adafruit_BME280 BME; // I2C interface
+SoftI2C_BME280 BME(8); // delayUs = 8 (safe);
 
 typedef struct {
   float temperature;
@@ -21,7 +20,7 @@ float denoisedAnalogRead(int pin) {
   int minVal = 1024, maxVal = -1;
   long sum = 0;
   for (int i = 0; i < READS; ++i) {
-    int v = analogRead(BATTERY_ANALOG);
+    int v = analogRead(pin);
     sum += v;
     if (v < minVal) minVal = v;
     if (v > maxVal) maxVal = v;
@@ -38,7 +37,7 @@ float denoisedAnalogRead(int pin) {
 #define getWindSpeedKmH() denoisedAnalogRead(ANEMOMETER_ANALOG)*252/1023.0f
 
 void setupBme() {
-  if (!BME.begin(0x76)) {  // Try 0x76 or 0x77 depending on the module
+  if (!BME.begin(D2, D3, 0x76)) {  // Try 0x76 or 0x77 depending on the module
     IF_SERIAL_DEBUG(Serial.println("Could not find a valid BME280 sensor!"));
     while (1) {
       ledPrint("    BME280 setup error!", true);
@@ -48,9 +47,9 @@ void setupBme() {
 
 BMEData getBMEdata() {
   BMEData data;
-  data.temperature = BME.readTemperature();       // °C
-  data.humidity = BME.readHumidity();             // %
-  data.bmp =  (BME.readPressure() / 100.0F); // hPa
+  data.temperature = BME.readTemperature();  // °C
+  data.humidity    = BME.readHumidity();     // %
+  data.bmp         = BME.readPressure();     // hPa
   return data;
 }
 

@@ -8,6 +8,7 @@ app = Flask(__name__)
 HOST = '0.0.0.0'
 SOCKET_PORT = 9000
 WEB_PORT = 5000
+DATA_SIZE = 40
 
 DATACHANGED = False
 
@@ -74,15 +75,16 @@ def socket_listener():
             while True:
                 conn, _ = s.accept()
                 data = conn.recv(1024)
-                crypted = data[:36]
-                nonce = data[36:48]
-                auth_tag = data[48:]
+                crypted = data[:DATA_SIZE]
+                nonce = data[DATA_SIZE:DATA_SIZE+12]
+                auth_tag = data[DATA_SIZE+12:]
                 aesgcm = AES.new(AES_KEY, AES.MODE_GCM, nonce=nonce)
                 decrypted = aesgcm.decrypt_and_verify(crypted, auth_tag)
                 (wind_speed_open,
                 wind_speed_close,
                 wind_speed_high,
                 wind_speed_low,
+                wind_mean,
                 temperature,
                 humidity,
                 bmp,
@@ -94,6 +96,7 @@ def socket_listener():
         wind_speed_close: {wind_speed_close}km/h
         wind_speed_high : {wind_speed_high}km/h
         wind_speed_low  : {wind_speed_low}km/h
+        wind_mean       : {wind_mean}km/h
         temperature     : {temperature}°C
         humidity        : {humidity}%
         bmp             : {bmp}hPa
@@ -102,7 +105,7 @@ def socket_listener():
                 """)
                 conn.close()
 
-                write_to_db(wind_speed_open, wind_speed_close, wind_speed_high, wind_speed_low,
+                write_to_db(wind_speed_open, wind_speed_close, wind_speed_high, wind_speed_low, wind_mean,
                             temperature,
                             humidity,
                             bmp,

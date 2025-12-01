@@ -19,6 +19,7 @@ typedef struct {
   float windSpeedClose;
   float windSpeedHigh;
   float windSpeedLow;
+  float windMean;
   float temperature;
   float humidity;
   float bmp;
@@ -87,6 +88,7 @@ void selectMode(uint32_t waitTime, uint32_t blinkInterval) {
   }
   MODE = mode;
   pinMode(MODE_SELECT_PIN, INPUT);
+  ledPrint("    ", false);
 }
 
 #endif // COMMON_H
