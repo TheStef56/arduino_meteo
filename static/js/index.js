@@ -88,6 +88,11 @@ function createChartById(id) {
 function changeTimezone(data) {
     data.forEach((_, idx) => {
         data[idx][0] = data[idx][0] + currentTimezoneOffset;
+        data[idx][11][0] = data[idx][11][0] + currentTimezoneOffset;
+        data[idx][12][0] = data[idx][12][0] + currentTimezoneOffset;
+        data[idx][13][0] = data[idx][13][0] + currentTimezoneOffset;
+        data[idx][14][0] = data[idx][14][0] + currentTimezoneOffset;
+        data[idx][15][0] = data[idx][15][0] + currentTimezoneOffset;
     })
 }
 
@@ -161,12 +166,12 @@ function changeTimeFrame(data, period) {
     return result;
 }
 
-function updateCharts(changeTMZ=false) {
-    const timeframeValue = document.getElementById("timeframe").innerText;
+function updateCharts() {
+    const timeframeValue = document.getElementById("timeframe").innerText.trim();
     const period = timeTable[timeframeValue];
     let dataArray = Array.from(localData);
     dataArray = changeTimeFrame(dataArray, period);
-    if (changeTMZ) changeTimezone(dataArray);
+    changeTimezone(dataArray);
     windMeanSpeedSeries.setData    (dataArray.map((entry) => {return {time: entry[0], value: entry[5]}}));
     temperatureMeanSeries.setData  (dataArray.map((entry) => {return {time: entry[0], value: entry[6]}}));
     humidityMeanSeries.setData     (dataArray.map((entry) => {return {time: entry[0], value: entry[7]}}));
@@ -180,10 +185,39 @@ function updateCharts(changeTMZ=false) {
     bmpSeries.setData          (dataArray.map((entry) => {return {time: entry[13][0], open: entry[13][1], close: entry[13][2], high: entry[13][3], low: entry[13][4]}}));
     batterySeries.setData      (dataArray.map((entry) => {return {time: entry[14][0], open: entry[14][1], close: entry[14][2], high: entry[14][3], low: entry[14][4]}}));
     windDirectionSeries.setData(dataArray.map((entry) => {return {time: entry[15][0], open: entry[15][1], close: entry[15][2], high: entry[15][3], low: entry[15][4]}}));
-
-
-
 }
+
+function updateSingleChart(chartId, type, value=true) {
+    const timeframeValue = document.getElementById("timeframe").innerText.trim();
+    const period = timeTable[timeframeValue];
+    let dataArray = Array.from(localData);
+    dataArray = changeTimeFrame(dataArray, period);
+    changeTimezone(dataArray);
+
+    if (type == "baseline") {
+        if (value) {
+            allSeries[chartId].setData(dataArray.map((entry) => {return {time: entry[0], value: entry[chartId+5]}}));
+        } else {
+            allSeries[chartId].setData([]);
+        }
+    } else if (type == "candles") {
+        if (value) {
+            if (chartId == 0) {
+                windSpeedSeries.setData(dataArray.map((entry) => {return {time: entry[0], open: entry[1], close: entry[2], high: entry[3], low: entry[4]}}));
+            } else {
+                console.log(dataArray);
+                allCandleSeries[chartId].setData(dataArray.map((entry) => {return {time: entry[10+chartId][0], open: entry[10+chartId][1], close: entry[10+chartId][2], high: entry[10+chartId][3], low: entry[10+chartId][4]}}));
+            }
+        } else {
+            if (chartId == 0) {
+                windSpeedSeries.setData([]);
+            } else {
+                allCandleSeries[chartId].setData([]);
+            }
+        }
+    }
+}
+
 
 function fetchData() {
     fetch("/data", {
@@ -206,7 +240,7 @@ const humidityChart      = createChartById('humidity-chart');
 const bmpChart           = createChartById('bmp-chart');
 const batteryChart       = createChartById('battery-chart');
 
-const allCharts = [ windSpeedChart, windDirectionChart, temperatureChart, humidityChart, bmpChart, batteryChart]
+const allCharts = [windSpeedChart, windDirectionChart, temperatureChart, humidityChart, bmpChart, batteryChart]
 
 const windSpeedSeries         = windSpeedChart.addSeries     (MyCharts.CandlestickSeries);
 const windDirectionSeries     = windDirectionChart.addSeries (MyCharts.CandlestickSeries);
@@ -215,12 +249,16 @@ const humiditySeries          = humidityChart.addSeries      (MyCharts.Candlesti
 const bmpSeries               = bmpChart.addSeries           (MyCharts.CandlestickSeries);
 const batterySeries           = batteryChart.addSeries       (MyCharts.CandlestickSeries);
 
+const allCandleSeries = [windSpeedSeries, temperatureSeries, humiditySeries, bmpSeries, batterySeries, windDirectionSeries]
+
 const windMeanSpeedSeries     = windSpeedChart.addSeries     (MyCharts.LineSeries);
 const windDirectionMeanSeries = windDirectionChart.addSeries (MyCharts.LineSeries);
 const temperatureMeanSeries   = temperatureChart.addSeries   (MyCharts.LineSeries);
 const humidityMeanSeries      = humidityChart.addSeries      (MyCharts.LineSeries);
 const bmpMeanSeries           = bmpChart.addSeries           (MyCharts.LineSeries);
 const batteryMeanSeries       = batteryChart.addSeries       (MyCharts.LineSeries);
+
+const allSeries = [windMeanSpeedSeries, temperatureMeanSeries, humidityMeanSeries, bmpMeanSeries, batteryMeanSeries, windDirectionMeanSeries]
 
 fetchData();
 
@@ -268,7 +306,7 @@ function changeTimeFrameLabel(label) {
 function changeTimezoneLabel(label) {
     document.getElementById("timezone").innerText = label;
     currentTimezoneOffset = timeZones[label]*3600;
-    updateCharts(true);
+    updateCharts();
 }
 
 function changeThemeLabel(label) {
@@ -357,7 +395,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // resetting media screen navbar state to avoid bug
+    // resetting media screen navbar state to avoid bug -----------------------------------------------
 
     window.addEventListener("resize", () => {
         if (window.innerWidth >= 1431) {
@@ -388,4 +426,34 @@ document.addEventListener("DOMContentLoaded", () => {
             if (evnt.touches.length == 0) lastTap = now;
         });
     });
+
+    // chart type selection logic --------------------------------------------------------------------------
+
+    Array.from(document.getElementsByClassName("chart-type-icon-button")).forEach(iconButton => {
+        iconButton.addEventListener("click", (ev) => {
+            let chartId = 0;
+            let type = "";
+            let value = false;
+            if (ev.target.parentElement.getAttribute("chart-id")) {
+                    chartId = ev.target.parentElement.getAttribute("chart-id");
+                } else {
+                    chartId = ev.target.parentElement.parentElement.getAttribute("chart-id");
+                }
+                if (ev.target.parentElement.classList.contains("baseline")) {
+                    type = ev.target.parentElement.classList.contains("baseline") ? "baseline" : "candles";
+                } else {
+                    type = ev.target.parentElement.parentElement.classList.contains("baseline") ? "baseline" : "candles";
+            }
+            if (ev.target.parentElement.classList.contains("active")) {
+                ev.target.parentElement.classList.remove("active");
+                ev.target.parentElement.parentElement.classList.remove("active");
+                value = false;
+            } else {
+                ev.target.parentElement.classList.add("active");
+                ev.target.parentElement.parentElement.classList.add("active");
+                value = true;
+            }
+            updateSingleChart(parseInt(chartId), type, value);
+        })
+    })
 });
