@@ -8,8 +8,9 @@ let darkMode              = true;
 let currentTimezoneOffset = 3600;
 let currentArrangement    = "Landscape";
 let localData             = [];
-let baselineSelected      = [0, 1, 2, 3, 4, 5];
-let candleSelected        = [0, 1, 2, 3, 4, 5];
+let baselineSelected      = [];
+let candleSelected        = [];
+let meanSelected          = [];
 
 const plotArrangements = {
     "Landscape" : {
@@ -89,12 +90,15 @@ function createChartById(id) {
 
 function changeTimezone(data) {
     data.forEach((_, idx) => {
+        // main timestamp
         data[idx][0] = data[idx][0] + currentTimezoneOffset;
+        
+        // candles timestamps
+        data[idx][10][0] = data[idx][10][0] + currentTimezoneOffset;
         data[idx][11][0] = data[idx][11][0] + currentTimezoneOffset;
         data[idx][12][0] = data[idx][12][0] + currentTimezoneOffset;
         data[idx][13][0] = data[idx][13][0] + currentTimezoneOffset;
         data[idx][14][0] = data[idx][14][0] + currentTimezoneOffset;
-        data[idx][15][0] = data[idx][15][0] + currentTimezoneOffset;
     })
 }
 
@@ -146,11 +150,10 @@ function changeTimeFrame(data, period) {
             const end = cumulative.length - 1;
             result.push([
                 cumulative[end][0],  // timestamp
-                cumulative[0][1],                      // open
+                cumulative[0][1],    // open
                 cumulative[end][2],  // close
-                maxWind,                               // high
-                minWind,                               // low
-                cumulative[end][5],  // mean
+                maxWind,             // high
+                minWind,             // low
                 cumulative[end][6],  // temp
                 cumulative[end][7],  // humid
                 cumulative[end][8],  // bmp
@@ -160,7 +163,8 @@ function changeTimeFrame(data, period) {
                 [cumulative[end][0], cml > 1 ? cumulative[0][7]  : data[idx-1][7],  cumulative[end][7],  maxHumid,   minHumid,],   // timestamp, open, close, max, min (humid)
                 [cumulative[end][0], cml > 1 ? cumulative[0][8]  : data[idx-1][8],  cumulative[end][8],  maxBmp,     minBmp,],     // timestamp, open, close, max, min (BMP)
                 [cumulative[end][0], cml > 1 ? cumulative[0][9]  : data[idx-1][9],  cumulative[end][9],  maxBattery, minBattery,], // timestamp, open, close, max, min (battery)
-                [cumulative[end][0], cml > 1 ? cumulative[0][10] : data[idx-1][10], cumulative[end][10], maxWindir,  minWindir,]   // timestamp, open, close, max, min (windir)
+                [cumulative[end][0], cml > 1 ? cumulative[0][10] : data[idx-1][10], cumulative[end][10], maxWindir,  minWindir,],  // timestamp, open, close, max, min (windir)
+                cumulative[end][5],  // mean
             ]);
             cumulative.length = 0;
             begin = 0;
@@ -186,6 +190,51 @@ function updateCharts() {
             updateSingleChart(idx, "baseline", false);
         }
     });
+
+    meanSeries.forEach((_, idx) => {
+        if (meanSelected.includes(idx)) {
+            updateSingleChart(idx, "mean", true);
+        } else {
+            updateSingleChart(idx, "mean", true);
+        }
+    });
+}
+
+function initSelectedCharts() {
+    Array.from(document.getElementsByClassName("chart-type-icon-button")).forEach(iconButton => {
+        let chartId = 0;
+        let type = "";
+        let value = false;
+        const target = iconButton;
+        if (target.getAttribute("chart-id")) {
+                chartId = parseInt(target.getAttribute("chart-id"));
+        } else {
+            chartId = parseInt(target.parentElement.getAttribute("chart-id"));
+        }
+        if (target.classList.contains("baseline") || target.parentElement.classList.contains("baseline")) {
+            type = "baseline";
+        } else if (target.classList.contains("candles") || target.parentElement.classList.contains("candles")){
+            type = "candles";
+        } else if (target.classList.contains("mean") || target.parentElement.classList.contains("mean")) {
+            type = "mean";
+        }
+
+        if (target.classList.contains("active") || target.parentElement.classList.contains("active")) {
+            value = true;
+        } else {
+            value = false;
+        }
+        
+        if (value) {
+            if (type == "candles" && !(candleSelected.includes(chartId))) {
+                candleSelected.push(chartId);
+            } else if (type == "baseline" && !(baselineSelected.includes(chartId))) {
+                baselineSelected.push(chartId);
+            } else if (type == "mean"  && !meanSelected.includes(chartId)) {
+                meanSelected.push(chartId);
+            }
+        }
+    })
 }
 
 function updateSingleChart(chartId, type, value=true) {
@@ -197,7 +246,11 @@ function updateSingleChart(chartId, type, value=true) {
 
     if (type == "baseline") {
         if (value) {
-            allSeries[chartId].setData(dataArray.map((entry) => {return {time: entry[0], value: entry[chartId+5]}}));
+            if (chartId == 0) {
+                allSeries[0].setData(dataArray.map((entry) => {return {time: entry[0], value: entry[2]}}));
+            } else {
+                allSeries[chartId].setData(dataArray.map((entry) => {return {time: entry[0], value: entry[chartId+4]}}));
+            }
         } else {
             allSeries[chartId].setData([]);
         }
@@ -206,7 +259,7 @@ function updateSingleChart(chartId, type, value=true) {
             if (chartId == 0) {
                 windSpeedSeries.setData(dataArray.map((entry) => {return {time: entry[0], open: entry[1], close: entry[2], high: entry[3], low: entry[4]}}));
             } else {
-                allCandleSeries[chartId].setData(dataArray.map((entry) => {return {time: entry[10+chartId][0], open: entry[10+chartId][1], close: entry[10+chartId][2], high: entry[10+chartId][3], low: entry[10+chartId][4]}}));
+                allCandleSeries[chartId].setData(dataArray.map((entry) => {return {time: entry[9+chartId][0], open: entry[9+chartId][1], close: entry[9+chartId][2], high: entry[9+chartId][3], low: entry[9+chartId][4]}}));
             }
         } else {
             if (chartId == 0) {
@@ -215,9 +268,14 @@ function updateSingleChart(chartId, type, value=true) {
                 allCandleSeries[chartId].setData([]);
             }
         }
+    } else if (type == "mean") {
+        if (value) {
+            meanSeries[chartId].setData(dataArray.map((entry) => {return {time: entry[0], value: entry[15+chartId]}}));
+        } else {
+            meanSeries[chartId].setData([]);
+        }
     }
 }
-
 
 function fetchData() {
     fetch("/data", {
@@ -242,42 +300,27 @@ const batteryChart       = createChartById('battery-chart');
 
 const allCharts = [windSpeedChart, windDirectionChart, temperatureChart, humidityChart, bmpChart, batteryChart]
 
-const windSpeedSeries         = windSpeedChart.addSeries     (MyCharts.CandlestickSeries);
-const windDirectionSeries     = windDirectionChart.addSeries (MyCharts.CandlestickSeries);
-const temperatureSeries       = temperatureChart.addSeries   (MyCharts.CandlestickSeries);
-const humiditySeries          = humidityChart.addSeries      (MyCharts.CandlestickSeries);
-const bmpSeries               = bmpChart.addSeries           (MyCharts.CandlestickSeries);
-const batterySeries           = batteryChart.addSeries       (MyCharts.CandlestickSeries);
+const windSpeedSeries         = windSpeedChart.addSeries    (MyCharts.CandlestickSeries);
+const windDirectionSeries     = windDirectionChart.addSeries(MyCharts.CandlestickSeries);
+const temperatureSeries       = temperatureChart.addSeries  (MyCharts.CandlestickSeries);
+const humiditySeries          = humidityChart.addSeries     (MyCharts.CandlestickSeries);
+const bmpSeries               = bmpChart.addSeries          (MyCharts.CandlestickSeries);
+const batterySeries           = batteryChart.addSeries      (MyCharts.CandlestickSeries);
 
 const allCandleSeries = [windSpeedSeries, temperatureSeries, humiditySeries, bmpSeries, batterySeries, windDirectionSeries]
 
-const windMeanSpeedSeries     = windSpeedChart.addSeries     (MyCharts.LineSeries);
-const windDirectionMeanSeries = windDirectionChart.addSeries (MyCharts.LineSeries);
-const temperatureMeanSeries   = temperatureChart.addSeries   (MyCharts.LineSeries);
-const humidityMeanSeries      = humidityChart.addSeries      (MyCharts.LineSeries);
-const bmpMeanSeries           = bmpChart.addSeries           (MyCharts.LineSeries);
-const batteryMeanSeries       = batteryChart.addSeries       (MyCharts.LineSeries);
+const windBaselineSpeedSeries     = windSpeedChart.addSeries    (MyCharts.LineSeries, {color: "#00e426"});
+const windDirectionBaselineSeries = windDirectionChart.addSeries(MyCharts.LineSeries);
+const temperatureBaselineSeries   = temperatureChart.addSeries  (MyCharts.LineSeries);
+const humidityBaselineSeries      = humidityChart.addSeries     (MyCharts.LineSeries);
+const bmpBaselineSeries           = bmpChart.addSeries          (MyCharts.LineSeries);
+const batteryBaselineSeries       = batteryChart.addSeries      (MyCharts.LineSeries);
 
-const allSeries = [windMeanSpeedSeries, temperatureMeanSeries, humidityMeanSeries, bmpMeanSeries, batteryMeanSeries, windDirectionMeanSeries]
+const allSeries = [windBaselineSpeedSeries, temperatureBaselineSeries, humidityBaselineSeries, bmpBaselineSeries, batteryBaselineSeries, windDirectionBaselineSeries]
 
-fetchData();
+const windMeanSpeedSeries = windSpeedChart.addSeries(MyCharts.LineSeries);
 
-setInterval(() => {
-    fetch("/data-changed").then(data => {
-        data.text().then(res => {
-            if (res == "yes") fetchData();
-        });
-    });
-}, 5000);
-
-window.addEventListener("resize", () => {
-    allCharts.forEach(chart => {
-        chart.applyOptions({ 
-            width : Math.min(Math.max(window.innerWidth*wSizeFactor , minChartWidth ), maxChartWidth),
-            height: Math.min(Math.max(window.innerHeight*hSizeFactor, minChartHeight), maxChartHeight)
-        });
-    });    
-});
+const meanSeries = [windMeanSpeedSeries];
 
 // UI callbacks ---------------------------------------------------------------------------
 
@@ -434,41 +477,69 @@ document.addEventListener("DOMContentLoaded", () => {
             let chartId = 0;
             let type = "";
             let value = false;
-            if (ev.target.parentElement.getAttribute("chart-id")) {
-                    chartId = parseInt(ev.target.parentElement.getAttribute("chart-id"));
-                } else {
-                    chartId = parseInt(ev.target.parentElement.parentElement.getAttribute("chart-id"));
-                }
-                if (ev.target.parentElement.classList.contains("baseline")) {
-                    type = ev.target.parentElement.classList.contains("baseline") ? "baseline" : "candles";
-                } else {
-                    type = ev.target.parentElement.parentElement.classList.contains("baseline") ? "baseline" : "candles";
+            const target = ev.target.parentElement;
+            if (target.getAttribute("chart-id")) {
+                    chartId = parseInt(target.getAttribute("chart-id"));
+            } else {
+                chartId = parseInt(target.parentElement.getAttribute("chart-id"));
             }
-            if (ev.target.parentElement.classList.contains("active")) {
-                ev.target.parentElement.classList.remove("active");
-                ev.target.parentElement.parentElement.classList.remove("active");
+            if (target.classList.contains("baseline") || target.parentElement.classList.contains("baseline")) {
+                type = "baseline";
+            } else if (target.classList.contains("candles") || target.parentElement.classList.contains("candles")){
+                type = "candles";
+            } else if (target.classList.contains("mean") || target.parentElement.classList.contains("mean")) {
+                type = "mean";
+            }
+
+            if (target.classList.contains("active") || target.parentElement.classList.contains("active")) {
+                target.classList.remove("active");
+                target.parentElement.classList.remove("active");
                 value = false;
             } else {
-                ev.target.parentElement.classList.add("active");
-                ev.target.parentElement.parentElement.classList.add("active");
+                target.classList.add("active");
+                target.parentElement.classList.add("active");
                 value = true;
             }
+
             updateSingleChart(chartId, type, value);
             if (value) {
                 if (type == "candles" && !(candleSelected.includes(chartId))) {
                     candleSelected.push(chartId);
-                }
-                if (type == "baseline" && !(baselineSelected.includes(chartId))) {
+                } else if (type == "baseline" && !(baselineSelected.includes(chartId))) {
                     baselineSelected.push(chartId);
+                } else if (type == "mean"  && !meanSelected.includes(chartId)) {
+                    meanSelected.push(chartId);
                 }
             } else {
                 if (type == "candles" && candleSelected.includes(chartId)) {
                     candleSelected.splice(candleSelected.indexOf(chartId), 1);
-                }
-                if (type == "baseline" && baselineSelected.includes(chartId)) {
+                } else if (type == "baseline" && baselineSelected.includes(chartId)) {
                     baselineSelected.splice(baselineSelected.indexOf(chartId), 1);
+                } else if (type == "mean" && meanSelected.includes(chartId)) {
+                    meanSelected.splice(meanSelected.indexOf(chartId), 1);
                 }
             }
         })
     })
+    // initialization -----------------------------------------------------------------
+
+    initSelectedCharts();
+    fetchData();
+    setInterval(() => {
+        fetch("/data-changed").then(data => {
+            data.text().then(res => {
+                if (res == "yes") fetchData();
+            });
+        });
+    }, 5000);
+
+    window.addEventListener("resize", () => {
+        allCharts.forEach(chart => {
+            chart.applyOptions({ 
+                width : Math.min(Math.max(window.innerWidth*wSizeFactor , minChartWidth ), maxChartWidth),
+                height: Math.min(Math.max(window.innerHeight*hSizeFactor, minChartHeight), maxChartHeight)
+            });
+        });    
+    });
 });
+
