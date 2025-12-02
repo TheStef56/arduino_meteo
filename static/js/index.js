@@ -25,7 +25,7 @@ const plotArrangements = {
 }
 
 const timeTable = {
-    "Unfiltered" : 0,
+    "Unfiltered" : 300,
     "5m"         : 300,
     "30m"        : 1800,
     "1h"         : 3600,
@@ -92,7 +92,7 @@ function changeTimezone(data) {
 }
 
 function changeTimeFrame(data, period) {
-    if (period == 0) return data;
+    // if (period == 0) return data;
     const result = new Array();
     const cumulative = new Array();
     const treshold = 1.25;
@@ -105,23 +105,53 @@ function changeTimeFrame(data, period) {
         }
         cumulative.push(entry);
         if (entry[0] - begin + resolution*treshold>= period || idx == data.length - 1) {
-            let max = 0;
-            let min = 9999999;
+            let maxWind    = 0;
+            let maxTemp    = 0;
+            let maxHumid   = 0;
+            let maxBmp     = 0;
+            let maxBattery = 0;
+            let maxWindir  = 0;
+            let minWind    = 9999999;
+            let minTemp    = 9999999;
+            let minHumid   = 9999999;
+            let minBmp     = 9999999;
+            let minBattery = 9999999;
+            let minWindir  = 9999999;
             cumulative.forEach(entry2 => {
-                if (entry2[3] > max) max = entry2[3];
-                if (entry2[4] < min) min = entry2[4];
+                if (entry2[3] > maxWind) maxWind = entry2[3];
+                if (entry2[4] < minWind) minWind = entry2[4];
+
+                if (entry2[6]  > maxTemp)    maxTemp    = entry2[6];
+                if (entry2[7]  > maxHumid)   maxHumid   = entry2[7];
+                if (entry2[8]  > maxBmp)     maxBmp     = entry2[8];
+                if (entry2[9]  > maxBattery) maxBattery = entry2[9];
+                if (entry2[10] > maxWindir)  maxWindir  = entry2[10];
+
+                if (entry2[6]  < minTemp)    minTemp    = entry2[6];
+                if (entry2[7]  < minHumid)   minHumid   = entry2[7];
+                if (entry2[8]  < minBmp)     minBmp     = entry2[8];
+                if (entry2[9]  < minBattery) minBattery = entry2[9];
+                if (entry2[10] < minWindir)  minWindir  = entry2[10];
+
+
             });
             result.push([
-                cumulative[cumulative.length - 1][0], // timestamp
-                cumulative[0][1],                     // open
-                cumulative[cumulative.length - 1][2], // close
-                max,                                  // high
-                min,                                  // low
-                cumulative[cumulative.length - 1][5], // temp
-                cumulative[cumulative.length - 1][6], // humid
-                cumulative[cumulative.length - 1][7], // bmp
-                cumulative[cumulative.length - 1][8], // battery
-                cumulative[cumulative.length - 1][9], // windir
+                cumulative[cumulative.length - 1][0],  // timestamp
+                cumulative[0][1],                      // open
+                cumulative[cumulative.length - 1][2],  // close
+                maxWind,                               // high
+                minWind,                               // low
+                cumulative[cumulative.length - 1][5],  // mean
+                cumulative[cumulative.length - 1][6],  // temp
+                cumulative[cumulative.length - 1][7],  // humid
+                cumulative[cumulative.length - 1][8],  // bmp
+                cumulative[cumulative.length - 1][9],  // battery
+                cumulative[cumulative.length - 1][10], // windir
+                [cumulative[cumulative.length - 1][0], cumulative.length > 1 ? cumulative[0][6]  : data[idx-1][6],  cumulative[cumulative.length - 1][6],  maxTemp,    minTemp,],    // timestamp, open, close, max, min (temp)
+                [cumulative[cumulative.length - 1][0], cumulative.length > 1 ? cumulative[0][7]  : data[idx-1][7],  cumulative[cumulative.length - 1][7],  maxHumid,   minHumid,],   // timestamp, open, close, max, min (humid)
+                [cumulative[cumulative.length - 1][0], cumulative.length > 1 ? cumulative[0][8]  : data[idx-1][8],  cumulative[cumulative.length - 1][8],  maxBmp,     minBmp,],     // timestamp, open, close, max, min (BMP)
+                [cumulative[cumulative.length - 1][0], cumulative.length > 1 ? cumulative[0][9]  : data[idx-1][9],  cumulative[cumulative.length - 1][9],  maxBattery, minBattery,], // timestamp, open, close, max, min (battery)
+                [cumulative[cumulative.length - 1][0], cumulative.length > 1 ? cumulative[0][10] : data[idx-1][10], cumulative[cumulative.length - 1][10], maxWindir,  minWindir,]   // timestamp, open, close, max, min (windir)
             ]);
             cumulative.length = 0;
             begin = 0;
@@ -131,19 +161,28 @@ function changeTimeFrame(data, period) {
     return result;
 }
 
-function updateCharts() {
+function updateCharts(changeTMZ=false) {
     const timeframeValue = document.getElementById("timeframe").innerText;
     const period = timeTable[timeframeValue];
     let dataArray = Array.from(localData);
     dataArray = changeTimeFrame(dataArray, period);
-    changeTimezone(dataArray);
-    windSpeedSeries.setData    (dataArray.map((entry) => {return {time: entry[0], open: entry[1], close: entry[2], high: entry[3], low: entry[4]}}));
-    windMeanSpeedSeries.setData(dataArray.map((entry) => {return {time: entry[0], value: entry[5]}}));
-    temperatureSeries.setData  (dataArray.map((entry) => {return {time: entry[0], value: entry[6]}}));
-    humiditySeries.setData     (dataArray.map((entry) => {return {time: entry[0], value: entry[7]}}));
-    bmpSeries.setData          (dataArray.map((entry) => {return {time: entry[0], value: entry[8]}}));
-    batterySeries.setData      (dataArray.map((entry) => {return {time: entry[0], value: entry[9]}}));
-    windDirectionSeries.setData(dataArray.map((entry) => {return {time: entry[0], value: entry[10]}}));
+    if (changeTMZ) changeTimezone(dataArray);
+    windMeanSpeedSeries.setData    (dataArray.map((entry) => {return {time: entry[0], value: entry[5]}}));
+    temperatureMeanSeries.setData  (dataArray.map((entry) => {return {time: entry[0], value: entry[6]}}));
+    humidityMeanSeries.setData     (dataArray.map((entry) => {return {time: entry[0], value: entry[7]}}));
+    bmpMeanSeries.setData          (dataArray.map((entry) => {return {time: entry[0], value: entry[8]}}));
+    batteryMeanSeries.setData      (dataArray.map((entry) => {return {time: entry[0], value: entry[9]}}));
+    windDirectionMeanSeries.setData(dataArray.map((entry) => {return {time: entry[0], value: entry[10]}}));
+    
+    windSpeedSeries.setData    (dataArray.map((entry) => {return {time: entry[0],     open: entry[1],     close: entry[2],     high: entry[3],     low: entry[4]}}));
+    temperatureSeries.setData  (dataArray.map((entry) => {return {time: entry[11][0], open: entry[11][1], close: entry[11][2], high: entry[11][3], low: entry[11][4]}}));
+    humiditySeries.setData     (dataArray.map((entry) => {return {time: entry[12][0], open: entry[12][1], close: entry[12][2], high: entry[12][3], low: entry[12][4]}}));
+    bmpSeries.setData          (dataArray.map((entry) => {return {time: entry[13][0], open: entry[13][1], close: entry[13][2], high: entry[13][3], low: entry[13][4]}}));
+    batterySeries.setData      (dataArray.map((entry) => {return {time: entry[14][0], open: entry[14][1], close: entry[14][2], high: entry[14][3], low: entry[14][4]}}));
+    windDirectionSeries.setData(dataArray.map((entry) => {return {time: entry[15][0], open: entry[15][1], close: entry[15][2], high: entry[15][3], low: entry[15][4]}}));
+
+
+
 }
 
 function fetchData() {
@@ -169,13 +208,19 @@ const batteryChart       = createChartById('battery-chart');
 
 const allCharts = [ windSpeedChart, windDirectionChart, temperatureChart, humidityChart, bmpChart, batteryChart]
 
-const windSpeedSeries     = windSpeedChart.addSeries     (MyCharts.CandlestickSeries);
-const windMeanSpeedSeries = windSpeedChart.addSeries     (MyCharts.LineSeries);
-const windDirectionSeries = windDirectionChart.addSeries (MyCharts.LineSeries);
-const temperatureSeries   = temperatureChart.addSeries   (MyCharts.LineSeries);
-const humiditySeries      = humidityChart.addSeries      (MyCharts.LineSeries);
-const bmpSeries           = bmpChart.addSeries           (MyCharts.LineSeries);
-const batterySeries       = batteryChart.addSeries       (MyCharts.LineSeries);
+const windSpeedSeries         = windSpeedChart.addSeries     (MyCharts.CandlestickSeries);
+const windDirectionSeries     = windDirectionChart.addSeries (MyCharts.CandlestickSeries);
+const temperatureSeries       = temperatureChart.addSeries   (MyCharts.CandlestickSeries);
+const humiditySeries          = humidityChart.addSeries      (MyCharts.CandlestickSeries);
+const bmpSeries               = bmpChart.addSeries           (MyCharts.CandlestickSeries);
+const batterySeries           = batteryChart.addSeries       (MyCharts.CandlestickSeries);
+
+const windMeanSpeedSeries     = windSpeedChart.addSeries     (MyCharts.LineSeries);
+const windDirectionMeanSeries = windDirectionChart.addSeries (MyCharts.LineSeries);
+const temperatureMeanSeries   = temperatureChart.addSeries   (MyCharts.LineSeries);
+const humidityMeanSeries      = humidityChart.addSeries      (MyCharts.LineSeries);
+const bmpMeanSeries           = bmpChart.addSeries           (MyCharts.LineSeries);
+const batteryMeanSeries       = batteryChart.addSeries       (MyCharts.LineSeries);
 
 fetchData();
 
@@ -223,7 +268,7 @@ function changeTimeFrameLabel(label) {
 function changeTimezoneLabel(label) {
     document.getElementById("timezone").innerText = label;
     currentTimezoneOffset = timeZones[label]*3600;
-    updateCharts();
+    updateCharts(true);
 }
 
 function changeThemeLabel(label) {

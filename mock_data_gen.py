@@ -1,10 +1,10 @@
 import time, random, struct
-DATA_SIZE = 33
+DATA_SIZE = 40
 
 def write_to_db(now,
                 temperature,
                 humidity,
-                wind_speed_open, wind_speed_close, wind_speed_high, wind_speed_low,
+                wind_speed_open, wind_speed_close, wind_speed_high, wind_speed_low, wind_speed_mean,
                 wind_dir,
                 bmp,
                 battery
@@ -23,6 +23,7 @@ def write_to_db(now,
         data += struct.pack('f', wind_speed_close)
         data += struct.pack('f', wind_speed_high)
         data += struct.pack('f', wind_speed_low)
+        data += struct.pack('f', wind_speed_mean)
         data += struct.pack('f', temperature)
         data += struct.pack('f', humidity)
         data += struct.pack('f', bmp)
@@ -44,6 +45,7 @@ for x in range(times):
         wind_speed_close = random.random()*60,
         wind_speed_high  = random.random()*60,
         wind_speed_low   = random.random()*60,
+        wind_speed_mean  = random.random()*60,
         temperature      = random.random()*40 - 5,
         humidity         = random.random()*100,
         bmp              = random.random()*12 + 1012,
