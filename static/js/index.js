@@ -8,6 +8,8 @@ let darkMode              = true;
 let currentTimezoneOffset = 3600;
 let currentArrangement    = "Landscape";
 let localData             = [];
+let baselineSelected      = [0, 1, 2, 3, 4, 5];
+let candleSelected        = [0, 1, 2, 3, 4, 5];
 
 const plotArrangements = {
     "Landscape" : {
@@ -140,23 +142,25 @@ function changeTimeFrame(data, period) {
 
 
             });
+            const cml = cumulative.length;
+            const end = cumulative.length - 1;
             result.push([
-                cumulative[cumulative.length - 1][0],  // timestamp
+                cumulative[end][0],  // timestamp
                 cumulative[0][1],                      // open
-                cumulative[cumulative.length - 1][2],  // close
+                cumulative[end][2],  // close
                 maxWind,                               // high
                 minWind,                               // low
-                cumulative[cumulative.length - 1][5],  // mean
-                cumulative[cumulative.length - 1][6],  // temp
-                cumulative[cumulative.length - 1][7],  // humid
-                cumulative[cumulative.length - 1][8],  // bmp
-                cumulative[cumulative.length - 1][9],  // battery
-                cumulative[cumulative.length - 1][10], // windir
-                [cumulative[cumulative.length - 1][0], cumulative.length > 1 ? cumulative[0][6]  : data[idx-1][6],  cumulative[cumulative.length - 1][6],  maxTemp,    minTemp,],    // timestamp, open, close, max, min (temp)
-                [cumulative[cumulative.length - 1][0], cumulative.length > 1 ? cumulative[0][7]  : data[idx-1][7],  cumulative[cumulative.length - 1][7],  maxHumid,   minHumid,],   // timestamp, open, close, max, min (humid)
-                [cumulative[cumulative.length - 1][0], cumulative.length > 1 ? cumulative[0][8]  : data[idx-1][8],  cumulative[cumulative.length - 1][8],  maxBmp,     minBmp,],     // timestamp, open, close, max, min (BMP)
-                [cumulative[cumulative.length - 1][0], cumulative.length > 1 ? cumulative[0][9]  : data[idx-1][9],  cumulative[cumulative.length - 1][9],  maxBattery, minBattery,], // timestamp, open, close, max, min (battery)
-                [cumulative[cumulative.length - 1][0], cumulative.length > 1 ? cumulative[0][10] : data[idx-1][10], cumulative[cumulative.length - 1][10], maxWindir,  minWindir,]   // timestamp, open, close, max, min (windir)
+                cumulative[end][5],  // mean
+                cumulative[end][6],  // temp
+                cumulative[end][7],  // humid
+                cumulative[end][8],  // bmp
+                cumulative[end][9],  // battery
+                cumulative[end][10], // windir
+                [cumulative[end][0], cml > 1 ? cumulative[0][6]  : data[idx-1][6],  cumulative[end][6],  maxTemp,    minTemp,],    // timestamp, open, close, max, min (temp)
+                [cumulative[end][0], cml > 1 ? cumulative[0][7]  : data[idx-1][7],  cumulative[end][7],  maxHumid,   minHumid,],   // timestamp, open, close, max, min (humid)
+                [cumulative[end][0], cml > 1 ? cumulative[0][8]  : data[idx-1][8],  cumulative[end][8],  maxBmp,     minBmp,],     // timestamp, open, close, max, min (BMP)
+                [cumulative[end][0], cml > 1 ? cumulative[0][9]  : data[idx-1][9],  cumulative[end][9],  maxBattery, minBattery,], // timestamp, open, close, max, min (battery)
+                [cumulative[end][0], cml > 1 ? cumulative[0][10] : data[idx-1][10], cumulative[end][10], maxWindir,  minWindir,]   // timestamp, open, close, max, min (windir)
             ]);
             cumulative.length = 0;
             begin = 0;
@@ -167,24 +171,21 @@ function changeTimeFrame(data, period) {
 }
 
 function updateCharts() {
-    const timeframeValue = document.getElementById("timeframe").innerText.trim();
-    const period = timeTable[timeframeValue];
-    let dataArray = Array.from(localData);
-    dataArray = changeTimeFrame(dataArray, period);
-    changeTimezone(dataArray);
-    windMeanSpeedSeries.setData    (dataArray.map((entry) => {return {time: entry[0], value: entry[5]}}));
-    temperatureMeanSeries.setData  (dataArray.map((entry) => {return {time: entry[0], value: entry[6]}}));
-    humidityMeanSeries.setData     (dataArray.map((entry) => {return {time: entry[0], value: entry[7]}}));
-    bmpMeanSeries.setData          (dataArray.map((entry) => {return {time: entry[0], value: entry[8]}}));
-    batteryMeanSeries.setData      (dataArray.map((entry) => {return {time: entry[0], value: entry[9]}}));
-    windDirectionMeanSeries.setData(dataArray.map((entry) => {return {time: entry[0], value: entry[10]}}));
-    
-    windSpeedSeries.setData    (dataArray.map((entry) => {return {time: entry[0],     open: entry[1],     close: entry[2],     high: entry[3],     low: entry[4]}}));
-    temperatureSeries.setData  (dataArray.map((entry) => {return {time: entry[11][0], open: entry[11][1], close: entry[11][2], high: entry[11][3], low: entry[11][4]}}));
-    humiditySeries.setData     (dataArray.map((entry) => {return {time: entry[12][0], open: entry[12][1], close: entry[12][2], high: entry[12][3], low: entry[12][4]}}));
-    bmpSeries.setData          (dataArray.map((entry) => {return {time: entry[13][0], open: entry[13][1], close: entry[13][2], high: entry[13][3], low: entry[13][4]}}));
-    batterySeries.setData      (dataArray.map((entry) => {return {time: entry[14][0], open: entry[14][1], close: entry[14][2], high: entry[14][3], low: entry[14][4]}}));
-    windDirectionSeries.setData(dataArray.map((entry) => {return {time: entry[15][0], open: entry[15][1], close: entry[15][2], high: entry[15][3], low: entry[15][4]}}));
+    allCandleSeries.forEach((_, idx) => {
+        if (candleSelected.includes(idx)) {
+            updateSingleChart(idx, "candles", true);
+        } else {
+            updateSingleChart(idx, "candles", false);
+        }
+    });
+
+    allSeries.forEach((_, idx) => {
+        if (baselineSelected.includes(idx)) {
+            updateSingleChart(idx, "baseline", true);
+        } else {
+            updateSingleChart(idx, "baseline", false);
+        }
+    });
 }
 
 function updateSingleChart(chartId, type, value=true) {
@@ -205,7 +206,6 @@ function updateSingleChart(chartId, type, value=true) {
             if (chartId == 0) {
                 windSpeedSeries.setData(dataArray.map((entry) => {return {time: entry[0], open: entry[1], close: entry[2], high: entry[3], low: entry[4]}}));
             } else {
-                console.log(dataArray);
                 allCandleSeries[chartId].setData(dataArray.map((entry) => {return {time: entry[10+chartId][0], open: entry[10+chartId][1], close: entry[10+chartId][2], high: entry[10+chartId][3], low: entry[10+chartId][4]}}));
             }
         } else {
@@ -435,9 +435,9 @@ document.addEventListener("DOMContentLoaded", () => {
             let type = "";
             let value = false;
             if (ev.target.parentElement.getAttribute("chart-id")) {
-                    chartId = ev.target.parentElement.getAttribute("chart-id");
+                    chartId = parseInt(ev.target.parentElement.getAttribute("chart-id"));
                 } else {
-                    chartId = ev.target.parentElement.parentElement.getAttribute("chart-id");
+                    chartId = parseInt(ev.target.parentElement.parentElement.getAttribute("chart-id"));
                 }
                 if (ev.target.parentElement.classList.contains("baseline")) {
                     type = ev.target.parentElement.classList.contains("baseline") ? "baseline" : "candles";
@@ -453,7 +453,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 ev.target.parentElement.parentElement.classList.add("active");
                 value = true;
             }
-            updateSingleChart(parseInt(chartId), type, value);
+            updateSingleChart(chartId, type, value);
+            if (value) {
+                if (type == "candles" && !(candleSelected.includes(chartId))) {
+                    candleSelected.push(chartId);
+                }
+                if (type == "baseline" && !(baselineSelected.includes(chartId))) {
+                    baselineSelected.push(chartId);
+                }
+            } else {
+                if (type == "candles" && candleSelected.includes(chartId)) {
+                    candleSelected.splice(candleSelected.indexOf(chartId), 1);
+                }
+                if (type == "baseline" && baselineSelected.includes(chartId)) {
+                    baselineSelected.splice(baselineSelected.indexOf(chartId), 1);
+                }
+            }
         })
     })
 });
