@@ -11,7 +11,7 @@
   #define IF_SERIAL_DEBUG(serial)
 #endif
 
-#define IF_LED_DEBUG(fn) do {if (MODE == WIFI_LED_DEBUG) {fn;}} while (0)
+#define IF_LED_DEBUG(fn) do {if (SETTINGS | LED_DEBUG) {fn;}} while (0)
 #define MODE_SELECT_PIN 13
 
 typedef struct {
@@ -28,8 +28,17 @@ typedef struct {
 } Data;
 
 typedef enum {
-  WIFI_LED_DEBUG,
+  NOTHING   = 0,
+  LED_DEBUG = 1,
+  WIFI      = 2,
+  SIM       = 4,
+} Settings;
+
+typedef enum {
   WIFI_NO_LED_DEBUG,
+  WIFI_LED_DEBUG,
+  SIM_NO_LED_DEBUG,
+  SIM_LED_DEBUG,
   MODE_LENGTH
 } Mode;
 
@@ -40,6 +49,7 @@ const char* MODES_CODE[] = {
 
 ArduinoLEDMatrix LED_MATRIX;
 Mode MODE;
+uint32_t SETTINGS;
 
 void ledPrintInit() {
   LED_MATRIX.begin();
@@ -61,9 +71,28 @@ void ledPrint(const char *text, bool scroll) {
   LED_MATRIX.endDraw();
 }
 
+void makeSettings() {
+  switch (MODE) {
+    case WIFI_NO_LED_DEBUG:
+      SETTINGS = WIFI;
+      break;
+    case WIFI_LED_DEBUG:
+      SETTINGS = WIFI | LED_DEBUG;
+      break;
+    case SIM_NO_LED_DEBUG:
+      SETTINGS = SIM;
+      break;
+    case SIM_LED_DEBUG:
+      SETTINGS = SIM | LED_DEBUG;
+      break;
+    default:
+      break;
+  }
+}
+
 void selectMode(uint32_t waitTime, uint32_t blinkInterval) {
   uint32_t startTime = millis();
-  Mode mode = WIFI_LED_DEBUG;
+  Mode mode = WIFI_NO_LED_DEBUG;
   pinMode(MODE_SELECT_PIN, INPUT_PULLUP);
 
   while (millis() - startTime < waitTime + blinkInterval*8){
@@ -87,6 +116,7 @@ void selectMode(uint32_t waitTime, uint32_t blinkInterval) {
     }
   }
   MODE = mode;
+  makeSettings();
   pinMode(MODE_SELECT_PIN, INPUT);
   ledPrint("    ", false);
 }
