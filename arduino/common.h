@@ -94,7 +94,8 @@ void selectMode(uint32_t waitTime, uint32_t blinkInterval) {
   uint32_t startTime = millis();
   Mode mode = WIFI_NO_LED_DEBUG;
   pinMode(MODE_SELECT_PIN, INPUT_PULLUP);
-
+  PinStatus prevRead = digitalRead(MODE_SELECT_PIN);
+  
   while (millis() - startTime < waitTime + blinkInterval*8){
     uint32_t remainingTime =  waitTime - (millis() - startTime);
     if (
@@ -108,11 +109,12 @@ void selectMode(uint32_t waitTime, uint32_t blinkInterval) {
     } else {
       ledPrint("    ", false);
     }
-    if (!digitalRead(MODE_SELECT_PIN)) {
+    PinStatus lastRead = digitalRead(MODE_SELECT_PIN);
+    if (!lastRead && lastRead != prevRead) {
       mode = (Mode)(((int)mode+1)%(int)MODE_LENGTH);
       ledPrint(MODES_CODE[(int)mode], false);
-      delay(200);
       startTime = millis();
+      prevRead = lastRead;
     }
   }
   MODE = mode;
