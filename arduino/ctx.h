@@ -20,6 +20,9 @@ int DATA_SENDING_INTERVAL   = 5*60*1000; // 5 min
 #define IF_LED_DEBUG(fn) do {if (SETTINGS & LED_DEBUG) {fn;}} while (0)
 #define MODE_SELECT_PIN 13
 
+#define ledPrintInit()   LED_MATRIX.begin()
+#define ledPrintDeInit() LED_MATRIX.end()
+
 typedef struct __attribute__((packed)) {
   float windSpeedOpen;
   float windSpeedClose;
@@ -61,12 +64,8 @@ const char* MODES_CODE[] = {
 };
 
 ArduinoLEDMatrix LED_MATRIX;
-Mode MODE = WIFI_LED_DEBUG;
-uint32_t SETTINGS = 0;
-
-void ledPrintInit() {
-  LED_MATRIX.begin();
-}
+Mode MODE;
+uint32_t SETTINGS;
 
 void ledPrint(const char *text, bool scroll) {
   LED_MATRIX.beginDraw();
@@ -111,11 +110,14 @@ void makeSettings() {
     WIND_MEASURING_INTERVAL = 200;
     DATA_SENDING_INTERVAL   = 1000;
   }
+  if (!(SETTINGS & LED_DEBUG)) {
+    ledPrintDeInit();
+  }
 }
 
 void selectMode(uint32_t waitTime, uint32_t blinkInterval) {
   uint32_t startTime = millis();
-  Mode mode = WIFI_NO_LED_DEBUG;
+  Mode mode = WIFI_NO_LED_DEBUG;                                // default mode
   pinMode(MODE_SELECT_PIN, INPUT_PULLUP);
   PinStatus prevRead = digitalRead(MODE_SELECT_PIN);
   

@@ -1,7 +1,6 @@
 #ifndef WIFI_MESSAGE_H
 #define WIFI_MESSAGE_H
 
-#include "common.h"
 #include <Crypto.h>
 #include <AES.h>
 #include <GCM.h>
