@@ -1,5 +1,6 @@
 import time, random, struct
-DATA_SIZE = 40
+with open("data.size", "r") as f:
+    DATA_SIZE = int(f.read()) 
 
 def write_to_db(now,
                 temperature,
