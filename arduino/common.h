@@ -20,7 +20,7 @@ int DATA_SENDING_INTERVAL   = 5*60*1000; // 5 min
 #define IF_LED_DEBUG(fn) do {if (SETTINGS & LED_DEBUG) {fn;}} while (0)
 #define MODE_SELECT_PIN 13
 
-typedef struct {
+typedef struct __attribute__((packed)) {
   float windSpeedOpen;
   float windSpeedClose;
   float windSpeedHigh;

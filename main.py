@@ -8,7 +8,8 @@ app = Flask(__name__)
 HOST = '0.0.0.0'
 SOCKET_PORT = 9000
 WEB_PORT = 5000
-DATA_SIZE = 40
+with open("data.size", "r") as f:
+    DATA_SIZE = int(f.read()) 
 
 DATACHANGED = False
 
