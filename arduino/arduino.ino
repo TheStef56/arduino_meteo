@@ -1,15 +1,7 @@
-// #define SERIAL_DEBUG
 #include "common.h"
 #include "env.h"
 #include "wifiMessage.h"
 #include "sensors.h"
-
-#define HOST "192.168.0.154"
-#define PORT 9000
-
-#define WIND_MEASURING_INTERVAL 5*1000 // 5 sec
-#define DATA_SENDING_INTERVAL 5*60*1000 // 5 min
-static_assert(WIND_MEASURING_INTERVAL < DATA_SENDING_INTERVAL);
 
 size_t count = 0;
 float windMean = 0.f;

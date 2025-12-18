@@ -1,17 +1,23 @@
 #ifndef COMMON_H
 #define COMMON_H
-
 #include <WiFiS3.h>
 #include <ArduinoGraphics.h>
 #include <Arduino_LED_Matrix.h>
 
+char HOST[] = "192.168.0.101";
+int PORT = 9000;
+
+int WIND_MEASURING_INTERVAL = 5*1000;    // 5 sec
+int DATA_SENDING_INTERVAL   = 5*60*1000; // 5 min
+
+// #define SERIAL_DEBUG
 #ifdef SERIAL_DEBUG
   #define IF_SERIAL_DEBUG(serial) serial
 #else
   #define IF_SERIAL_DEBUG(serial)
 #endif
 
-#define IF_LED_DEBUG(fn) do {if (SETTINGS | LED_DEBUG) {fn;}} while (0)
+#define IF_LED_DEBUG(fn) do {if (SETTINGS & LED_DEBUG) {fn;}} while (0)
 #define MODE_SELECT_PIN 13
 
 typedef struct {
@@ -30,26 +36,33 @@ typedef struct {
 typedef enum {
   NOTHING   = 0,
   LED_DEBUG = 1,
-  WIFI      = 2,
-  SIM       = 4,
+  DEBUG     = 2,
+  WIFI      = 4,
+  SIM       = 8,
 } Settings;
 
 typedef enum {
   WIFI_NO_LED_DEBUG,
+  WIFI_DEBUG,
   WIFI_LED_DEBUG,
   SIM_NO_LED_DEBUG,
+  SIM_DEBUG,
   SIM_LED_DEBUG,
   MODE_LENGTH
 } Mode;
 
 const char* MODES_CODE[] = {
-  "M1",
-  "M2"
+  "WN",
+  "WD",
+  "WL",
+  "SN",
+  "SD",
+  "SL",
 };
 
 ArduinoLEDMatrix LED_MATRIX;
-Mode MODE;
-uint32_t SETTINGS;
+Mode MODE = WIFI_LED_DEBUG;
+uint32_t SETTINGS = 0;
 
 void ledPrintInit() {
   LED_MATRIX.begin();
@@ -76,17 +89,27 @@ void makeSettings() {
     case WIFI_NO_LED_DEBUG:
       SETTINGS = WIFI;
       break;
+    case WIFI_DEBUG:
+      SETTINGS = WIFI | DEBUG;
+      break;
     case WIFI_LED_DEBUG:
-      SETTINGS = WIFI | LED_DEBUG;
+      SETTINGS = WIFI | DEBUG | LED_DEBUG;
       break;
     case SIM_NO_LED_DEBUG:
       SETTINGS = SIM;
       break;
+    case SIM_DEBUG:
+      SETTINGS = SIM | DEBUG;
+      break;
     case SIM_LED_DEBUG:
-      SETTINGS = SIM | LED_DEBUG;
+      SETTINGS = SIM | DEBUG | LED_DEBUG;
       break;
     default:
       break;
+  }
+  if (SETTINGS & DEBUG) {
+    WIND_MEASURING_INTERVAL = 200;
+    DATA_SENDING_INTERVAL   = 1000;
   }
 }
 
@@ -114,8 +137,8 @@ void selectMode(uint32_t waitTime, uint32_t blinkInterval) {
       mode = (Mode)(((int)mode+1)%(int)MODE_LENGTH);
       ledPrint(MODES_CODE[(int)mode], false);
       startTime = millis();
-      prevRead = lastRead;
     }
+    prevRead = lastRead;
   }
   MODE = mode;
   makeSettings();
