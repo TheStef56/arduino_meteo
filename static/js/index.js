@@ -159,11 +159,11 @@ function changeTimeFrame(data, period) {
                 cumulative[end][8],  // bmp
                 cumulative[end][9],  // battery
                 cumulative[end][10], // windir
-                [cumulative[end][0], cml > 1 ? cumulative[0][6]  : data[idx-1][6],  cumulative[end][6],  maxTemp,    minTemp,],    // timestamp, open, close, max, min (temp)
-                [cumulative[end][0], cml > 1 ? cumulative[0][7]  : data[idx-1][7],  cumulative[end][7],  maxHumid,   minHumid,],   // timestamp, open, close, max, min (humid)
-                [cumulative[end][0], cml > 1 ? cumulative[0][8]  : data[idx-1][8],  cumulative[end][8],  maxBmp,     minBmp,],     // timestamp, open, close, max, min (BMP)
-                [cumulative[end][0], cml > 1 ? cumulative[0][9]  : data[idx-1][9],  cumulative[end][9],  maxBattery, minBattery,], // timestamp, open, close, max, min (battery)
-                [cumulative[end][0], cml > 1 ? cumulative[0][10] : data[idx-1][10], cumulative[end][10], maxWindir,  minWindir,],  // timestamp, open, close, max, min (windir)
+                [cumulative[end][0], cml > 1 ? cumulative[0][6]  : data[data.length != 1 ? idx-1 : 0][6],  cumulative[end][6],  maxTemp,    minTemp,],    // timestamp, open, close, max, min (temp)
+                [cumulative[end][0], cml > 1 ? cumulative[0][7]  : data[data.length != 1 ? idx-1 : 0][7],  cumulative[end][7],  maxHumid,   minHumid,],   // timestamp, open, close, max, min (humid)
+                [cumulative[end][0], cml > 1 ? cumulative[0][8]  : data[data.length != 1 ? idx-1 : 0][8],  cumulative[end][8],  maxBmp,     minBmp,],     // timestamp, open, close, max, min (BMP)
+                [cumulative[end][0], cml > 1 ? cumulative[0][9]  : data[data.length != 1 ? idx-1 : 0][9],  cumulative[end][9],  maxBattery, minBattery,], // timestamp, open, close, max, min (battery)
+                [cumulative[end][0], cml > 1 ? cumulative[0][10] : data[data.length != 1 ? idx-1 : 0][10], cumulative[end][10], maxWindir,  minWindir,],  // timestamp, open, close, max, min (windir)
                 cumulative[end][5],  // mean
             ]);
             cumulative.length = 0;
@@ -195,7 +195,7 @@ function updateCharts() {
         if (meanSelected.includes(idx)) {
             updateSingleChart(idx, "mean", true);
         } else {
-            updateSingleChart(idx, "mean", true);
+            updateSingleChart(idx, "mean", false);
         }
     });
 }
@@ -309,7 +309,7 @@ const batterySeries           = batteryChart.addSeries      (MyCharts.Candlestic
 
 const allCandleSeries = [windSpeedSeries, temperatureSeries, humiditySeries, bmpSeries, batterySeries, windDirectionSeries]
 
-const windBaselineSpeedSeries     = windSpeedChart.addSeries    (MyCharts.LineSeries, {color: "#00e426"});
+const windBaselineSpeedSeries     = windSpeedChart.addSeries    (MyCharts.LineSeries);
 const windDirectionBaselineSeries = windDirectionChart.addSeries(MyCharts.LineSeries);
 const temperatureBaselineSeries   = temperatureChart.addSeries  (MyCharts.LineSeries);
 const humidityBaselineSeries      = humidityChart.addSeries     (MyCharts.LineSeries);
@@ -318,7 +318,7 @@ const batteryBaselineSeries       = batteryChart.addSeries      (MyCharts.LineSe
 
 const allSeries = [windBaselineSpeedSeries, temperatureBaselineSeries, humidityBaselineSeries, bmpBaselineSeries, batteryBaselineSeries, windDirectionBaselineSeries]
 
-const windMeanSpeedSeries = windSpeedChart.addSeries(MyCharts.LineSeries);
+const windMeanSpeedSeries = windSpeedChart.addSeries(MyCharts.LineSeries, {color: "#00e426"});
 
 const meanSeries = [windMeanSpeedSeries];
 

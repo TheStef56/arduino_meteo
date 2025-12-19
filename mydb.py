@@ -32,24 +32,24 @@ def truncate_db_size():
         traceback.print_exception(e)
     DB_LOCK = False
 
-def shift_data(data, window):
+def shift_data(data, window, inc):
     res = data[window[0]:window[1]]
-    window[0] += 4
-    window[1] += 4
+    window[0] += inc
+    window[1] += inc
     return res
 
 def unpack_data(data):
     window = [0, 4]
-    wind_speed_open  = struct.unpack('f', shift_data(data, window))[0]
-    wind_speed_close = struct.unpack('f', shift_data(data, window))[0]
-    wind_speed_high  = struct.unpack('f', shift_data(data, window))[0]
-    wind_speed_low   = struct.unpack('f', shift_data(data, window))[0]
-    wind_mean        = struct.unpack('f', shift_data(data, window))[0]
-    temperature      = struct.unpack('f', shift_data(data, window))[0]
-    humidity         = struct.unpack('f', shift_data(data, window))[0]
-    bmp              = struct.unpack('f', shift_data(data, window))[0]
-    battery          = struct.unpack('f', shift_data(data, window))[0]
-    wind_dir         = struct.unpack('f', shift_data(data, window))[0]
+    wind_speed_open  = struct.unpack('f', shift_data(data, window, 4))[0]
+    wind_speed_close = struct.unpack('f', shift_data(data, window, 4))[0]
+    wind_speed_high  = struct.unpack('f', shift_data(data, window, 4))[0]
+    wind_speed_low   = struct.unpack('f', shift_data(data, window, 4))[0]
+    wind_mean        = struct.unpack('f', shift_data(data, window, 4))[0]
+    temperature      = struct.unpack('f', shift_data(data, window, 4))[0]
+    humidity         = struct.unpack('f', shift_data(data, window, 4))[0]
+    bmp              = struct.unpack('f', shift_data(data, window, 4))[0]
+    battery          = struct.unpack('f', shift_data(data, window, 4))[0]
+    wind_dir         = struct.unpack('f', shift_data(data, window, 4))[0]
     return (wind_speed_open,
             wind_speed_close,
             wind_speed_high,
