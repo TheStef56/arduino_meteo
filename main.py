@@ -1,11 +1,11 @@
-import json, socket, threading
+import json, socket, threading, time
 from Crypto.Cipher import AES
 from flask import Flask, render_template
 from mydb import *
 from env import AES_KEY
 
 app = Flask(__name__)
-HOST = '0.0.0.0'
+HOST = '192.168.0.101'
 SOCKET_PORT = 9000
 WEB_PORT = 5000
 with open("data.size", "r") as f:
@@ -93,6 +93,7 @@ def socket_listener():
                 wind_dir) = unpack_data(decrypted)
 
                 print(f"""
+        timestamp:      : {time.time()}
         wind_speed_open : {wind_speed_open}km/h
         wind_speed_close: {wind_speed_close}km/h
         wind_speed_high : {wind_speed_high}km/h
