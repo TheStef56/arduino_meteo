@@ -159,11 +159,11 @@ function changeTimeFrame(data, period) {
                 cumulative[end][8],  // bmp
                 cumulative[end][9],  // battery
                 cumulative[end][10], // windir
-                [cumulative[end][0], cml > 1 ? cumulative[0][6]  : data[data.length != 1 ? idx-1 : 0][6],  cumulative[end][6],  maxTemp,    minTemp,],    // timestamp, open, close, max, min (temp)
-                [cumulative[end][0], cml > 1 ? cumulative[0][7]  : data[data.length != 1 ? idx-1 : 0][7],  cumulative[end][7],  maxHumid,   minHumid,],   // timestamp, open, close, max, min (humid)
-                [cumulative[end][0], cml > 1 ? cumulative[0][8]  : data[data.length != 1 ? idx-1 : 0][8],  cumulative[end][8],  maxBmp,     minBmp,],     // timestamp, open, close, max, min (BMP)
-                [cumulative[end][0], cml > 1 ? cumulative[0][9]  : data[data.length != 1 ? idx-1 : 0][9],  cumulative[end][9],  maxBattery, minBattery,], // timestamp, open, close, max, min (battery)
-                [cumulative[end][0], cml > 1 ? cumulative[0][10] : data[data.length != 1 ? idx-1 : 0][10], cumulative[end][10], maxWindir,  minWindir,],  // timestamp, open, close, max, min (windir)
+                [cumulative[end][0], data[Math.max(0, idx - cml)][6],  cumulative[end][6],  maxTemp,    minTemp,],    // timestamp, open, close, max, min (temp)
+                [cumulative[end][0], data[Math.max(0, idx - cml)][7],  cumulative[end][7],  maxHumid,   minHumid,],   // timestamp, open, close, max, min (humid)
+                [cumulative[end][0], data[Math.max(0, idx - cml)][8],  cumulative[end][8],  maxBmp,     minBmp,],     // timestamp, open, close, max, min (BMP)
+                [cumulative[end][0], data[Math.max(0, idx - cml)][9],  cumulative[end][9],  maxBattery, minBattery,], // timestamp, open, close, max, min (battery)
+                [cumulative[end][0], data[Math.max(0, idx - cml)][10], cumulative[end][10], maxWindir,  minWindir,],  // timestamp, open, close, max, min (windir)
                 cumulative[end][5],  // mean
             ]);
             cumulative.length = 0;
@@ -207,7 +207,7 @@ function initSelectedCharts() {
         let value = false;
         const target = iconButton;
         if (target.getAttribute("chart-id")) {
-                chartId = parseInt(target.getAttribute("chart-id"));
+            chartId = parseInt(target.getAttribute("chart-id"));
         } else {
             chartId = parseInt(target.parentElement.getAttribute("chart-id"));
         }
@@ -226,9 +226,9 @@ function initSelectedCharts() {
         }
         
         if (value) {
-            if (type == "candles" && !(candleSelected.includes(chartId))) {
+            if (type == "candles" && !candleSelected.includes(chartId)) {
                 candleSelected.push(chartId);
-            } else if (type == "baseline" && !(baselineSelected.includes(chartId))) {
+            } else if (type == "baseline" && !baselineSelected.includes(chartId)) {
                 baselineSelected.push(chartId);
             } else if (type == "mean"  && !meanSelected.includes(chartId)) {
                 meanSelected.push(chartId);
@@ -503,9 +503,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             updateSingleChart(chartId, type, value);
             if (value) {
-                if (type == "candles" && !(candleSelected.includes(chartId))) {
+                if (type == "candles" && !candleSelected.includes(chartId)) {
                     candleSelected.push(chartId);
-                } else if (type == "baseline" && !(baselineSelected.includes(chartId))) {
+                } else if (type == "baseline" && !baselineSelected.includes(chartId)) {
                     baselineSelected.push(chartId);
                 } else if (type == "mean"  && !meanSelected.includes(chartId)) {
                     meanSelected.push(chartId);
