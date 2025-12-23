@@ -237,11 +237,20 @@ function initSelectedCharts() {
     })
 }
 
+function rectifyWindCandleOpenings(data) {
+    let result = Array.from(data);
+    result.forEach((_, idx) => {
+        if (idx > 0) result[idx][1] = result[idx - 1][2];
+    });
+    return result;
+}
+
 function updateSingleChart(chartId, type, value=true) {
     const timeframeValue = document.getElementById("timeframe").innerText.trim();
     const period = timeTable[timeframeValue];
     let dataArray = Array.from(localData);
     dataArray = changeTimeFrame(dataArray, period);
+    dataArray = rectifyWindCandleOpenings(dataArray);
     changeTimezone(dataArray);
 
     if (type == "baseline") {
