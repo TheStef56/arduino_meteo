@@ -206,20 +206,16 @@ function initSelectedCharts() {
         let type = "";
         let value = false;
         const target = iconButton;
-        if (target.getAttribute("chart-id")) {
-            chartId = parseInt(target.getAttribute("chart-id"));
-        } else {
-            chartId = parseInt(target.parentElement.getAttribute("chart-id"));
-        }
-        if (target.classList.contains("baseline") || target.parentElement.classList.contains("baseline")) {
+        chartId = parseInt(target.getAttribute("chart-id"));
+        if (target.classList.contains("baseline")) {
             type = "baseline";
-        } else if (target.classList.contains("candles") || target.parentElement.classList.contains("candles")){
+        } else if (target.classList.contains("candles")){
             type = "candles";
-        } else if (target.classList.contains("mean") || target.parentElement.classList.contains("mean")) {
+        } else if (target.classList.contains("mean")) {
             type = "mean";
         }
 
-        if (target.classList.contains("active") || target.parentElement.classList.contains("active")) {
+        if (target.classList.contains("active")) {
             value = true;
         } else {
             value = false;
@@ -486,27 +482,22 @@ document.addEventListener("DOMContentLoaded", () => {
             let chartId = 0;
             let type = "";
             let value = false;
-            const target = ev.target.parentElement;
-            if (target.getAttribute("chart-id")) {
-                    chartId = parseInt(target.getAttribute("chart-id"));
-            } else {
-                chartId = parseInt(target.parentElement.getAttribute("chart-id"));
-            }
-            if (target.classList.contains("baseline") || target.parentElement.classList.contains("baseline")) {
+            const target = ev.currentTarget;
+            chartId = parseInt(target.getAttribute("chart-id"));
+
+            if (target.classList.contains("baseline")) {
                 type = "baseline";
-            } else if (target.classList.contains("candles") || target.parentElement.classList.contains("candles")){
+            } else if (target.classList.contains("candles")){
                 type = "candles";
-            } else if (target.classList.contains("mean") || target.parentElement.classList.contains("mean")) {
+            } else if (target.classList.contains("mean")) {
                 type = "mean";
             }
 
-            if (target.classList.contains("active") || target.parentElement.classList.contains("active")) {
+            if (target.classList.contains("active")) {
                 target.classList.remove("active");
-                target.parentElement.classList.remove("active");
                 value = false;
             } else {
                 target.classList.add("active");
-                target.parentElement.classList.add("active");
                 value = true;
             }
 
