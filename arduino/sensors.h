@@ -47,9 +47,11 @@ void setupBme() {
 
 BMEData getBMEdata() {
   BMEData data;
-  data.temperature = BME.readTemperature();  // °C
-  data.humidity    = BME.readHumidity();     // %
-  data.bmp         = BME.readPressure();     // hPa
+  BME.readAll(
+    data.temperature,
+    data.humidity,
+    data.bmp
+  );
   return data;
 }
 

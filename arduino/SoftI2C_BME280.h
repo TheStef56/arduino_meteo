@@ -264,10 +264,10 @@ bool SoftI2C_BME280::readCalibration() {
 void SoftI2C_BME280::writeDefaultConfig() {
   // humidity oversampling x1
   writeRegister(BME280_REG_CTRL_HUM, 0x01);
-  // config: standby 1000 ms, filter off (0xA0)
-  writeRegister(BME280_REG_CONFIG, 0xA0);
-  // ctrl_meas: osrs_t=1, osrs_p=1, mode=normal (0x27)
-  writeRegister(BME280_REG_CTRL_MEAS, 0x27);
+  // config: standby 1000 ms, filter off (0xA0) was default config, switched to 0x00 (no standby needed for forced mode)
+  writeRegister(BME280_REG_CONFIG, 0x00);
+  // ctrl_meas: osrs_t=1, osrs_p=1, mode=normal (0x27) was default config, switched to 0x25 (temp and pressure oversampling, forced mode) 
+  writeRegister(BME280_REG_CTRL_MEAS, 0x25);
   delay(10);
 }
 
@@ -348,6 +348,8 @@ float SoftI2C_BME280::readHumidity() {
 }
 
 bool SoftI2C_BME280::readAll(float &T, float &P, float &H) {
+  writeRegister(BME280_REG_CTRL_MEAS, 0x25);
+  delay(10);
   T = readTemperature();
   // readTemperature updates t_fine
   P = readPressure();

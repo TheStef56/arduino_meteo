@@ -53,7 +53,7 @@ void setupWifi() {
   IF_SERIAL_DEBUG(printWifiStatus());
 }
 
-void sendWifiMessage(const char *ip, int port, uint8_t *message, size_t size) {
+int sendWifiMessage(const char *ip, int port, uint8_t *message, size_t size) {
   while (1) {  
     WiFiClient client;  
     int res = client.connect(ip, port);
