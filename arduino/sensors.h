@@ -49,8 +49,8 @@ BMEData getBMEdata() {
   BMEData data;
   BME.readAll(
     data.temperature,
-    data.humidity,
-    data.bmp
+    data.bmp,
+    data.humidity
   );
   return data;
 }

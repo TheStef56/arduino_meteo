@@ -4,7 +4,7 @@
 #include <ArduinoGraphics.h>
 #include <Arduino_LED_Matrix.h>
 
-char HOST[] = "192.168.0.154";
+char HOST[] = "192.168.0.101";
 int PORT = 9000;
 
 int WIND_MEASURING_INTERVAL = 5*1000;    // 5 sec
