@@ -327,6 +327,78 @@ const windMeanSpeedSeries = windSpeedChart.addSeries(MyCharts.LineSeries, {color
 
 const meanSeries = [windMeanSpeedSeries];
 
+
+// Wind Direction Series Cardinal Points --------------------------------------------------
+
+const windDirectionCardinalSeries = windDirectionChart.addSeries(MyCharts.LineSeries, {
+    lastValueVisible: false,
+    priceLineVisible: false,
+});
+
+const lineWidth = 2;
+
+const North = {
+    price: 360,
+    color: 'red',
+    lineWidth: lineWidth,
+    lineStyle: 2, // LineStyle.Dashed
+    axisLabelVisible: true,
+    title: 'N',
+};
+
+const North0 = {
+    price: 0,
+    color: 'red',
+    lineWidth: lineWidth,
+    lineStyle: 2, // LineStyle.Dashed
+    axisLabelVisible: true,
+    title: 'N',
+};
+
+const South = {
+    price: 180,
+    color: 'red',
+    lineWidth: lineWidth,
+    lineStyle: 1, // LineStyle.Dotted
+    axisLabelVisible: true,
+    title: 'S',
+};
+const East = {
+    price: 90,
+    color: 'red',
+    lineWidth: lineWidth,
+    lineStyle: 2, // LineStyle.Dashed
+    axisLabelVisible: true,
+    title: 'E',
+};
+
+const West = {
+    price: 270,
+    color: 'red',
+    lineWidth: lineWidth,
+    lineStyle: 2, // LineStyle.Dashed
+    axisLabelVisible: true,
+    title: 'W',
+};
+
+windDirectionCardinalSeries.createPriceLine(North0);
+windDirectionCardinalSeries.createPriceLine(North);
+windDirectionCardinalSeries.createPriceLine(South);
+windDirectionCardinalSeries.createPriceLine(East);
+windDirectionCardinalSeries.createPriceLine(West);
+
+windDirectionCardinalSeries.setData([
+  {
+    time: Date.now() / 1000,
+    value: 180,
+  }
+]);
+
+windDirectionCardinalSeries.applyOptions({
+  color: 'rgba(0,0,0,0)',
+  lineWidth: 0,
+});
+
 // UI callbacks ---------------------------------------------------------------------------
 
 function changeArrangement() {
