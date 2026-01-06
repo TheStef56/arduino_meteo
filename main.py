@@ -70,9 +70,15 @@ def socket_listener():
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.bind((HOST, SOCKET_PORT))
             s.listen(5)
+            s.settimeout(1)
             print(f"Socket server listening on port {SOCKET_PORT}...")
             while True:
-                conn, _ = s.accept()
+                try:
+                    conn, _ = s.accept()
+                except Exception as e:
+                    if e != TimeoutError:
+                        traceback.print_exception(e)
+                    continue
                 data = conn.recv(1024)
                 crypted = data[:DATA_SIZE]
                 nonce = data[DATA_SIZE:DATA_SIZE+12]
