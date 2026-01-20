@@ -8,7 +8,7 @@
 
 #define READS 100
 
-SoftI2C_BME280 BME(8); // delayUs = 8 (safe);
+SoftI2C_BME280 BME(500); // delayUs = 8 (safe); changed to 500 by testing with new sensor...only value for stable results
 
 typedef struct {
   float temperature;

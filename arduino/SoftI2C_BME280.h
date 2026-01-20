@@ -107,7 +107,7 @@ bool SoftI2C_BME280::begin(uint8_t sdaPin, uint8_t sclPin, uint8_t address) {
   // Start pins released (use internal pull-ups; external 4.7k recommended)
   pinMode(_sdaPin, INPUT_PULLUP);
   pinMode(_sclPin, INPUT_PULLUP);
-  delay(5);
+  delay(24);
 
   // check device ID
   uint8_t id = readRegister(BME280_REG_ID);
@@ -115,7 +115,7 @@ bool SoftI2C_BME280::begin(uint8_t sdaPin, uint8_t sclPin, uint8_t address) {
 
   // soft reset
   writeRegister(BME280_REG_RESET, 0xB6);
-  delay(10);
+  delay(24);
 
   // read calibration
   if (!readCalibration()) return false;
