@@ -7,7 +7,7 @@ from env import AES_KEY, HOST, SOCKET_PORT, WEB_PORT
 from proto import WindData
 
 app = Flask(__name__)
-DATA_SIZE = WindData().size 
+DATA_SIZE = WindData.size 
 
 DATACHANGED = False
 

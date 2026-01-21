@@ -1,7 +1,7 @@
 import time, random, struct
 from proto import WindData
 
-DATA_SIZE = WindData().size
+DATA_SIZE = WindData.size
 
 def write_to_db(now,
                 temperature,

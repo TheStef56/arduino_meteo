@@ -10,3 +10,4 @@ typedef struct __attribute__((packed)) {
     float batteryVolts;
     float windDirection;
 } WindData;
+

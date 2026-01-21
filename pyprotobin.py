@@ -54,15 +54,6 @@ def generate_python_classes():
         # class declaration and params init ----------------------------------------- 
 
         res += f"class {obj['obj']}:\n"
-        res += f"    def __init__(self, "
-        for param, _ in items:
-            res += f"{param}=None, "
-        res += "):\n"
-
-
-        for param, _ in items:
-            res += f"        self.{param} = {param}\n"
-        
         size = sum(
             struct_symbols[x[1]][Lang.SIZE.value]
             if x[1] in struct_symbols
@@ -72,7 +63,15 @@ def generate_python_classes():
 
         ALL_STRUCTS.update({obj['obj'] : (size , obj)})
 
-        res += f"        self.size = {size}\n\n"
+        res += f"    size = {size}\n\n"
+        res += f"    def __init__(self, "
+        for param, _ in items:
+            res += f"{param}=None, "
+        res += "):\n"
+
+
+        for param, _ in items:
+            res += f"        self.{param} = {param}\n"
         
         # from_binary ---------------------------------------------------------------
 
@@ -130,8 +129,8 @@ def generate_c_structs():
 
 def main():
     parser = argparse.ArgumentParser(description="Generate Python and C structs from proto file.")
-    parser.add_argument("input_file", nargs="?", default="proto.ptb",
-                        help="Input proto file (default: proto.ptb)")
+    parser.add_argument("input_file", nargs="?", default="proto.ppb",
+                        help="Input proto file (default: proto.ppb)")
     parser.add_argument("-py", "--python_output", default="./proto.py",
                         help="Python output file (default: ./proto.py)")
     parser.add_argument("-c", "--c_output", default="./proto.h",

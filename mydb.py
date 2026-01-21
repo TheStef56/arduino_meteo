@@ -1,7 +1,7 @@
 import time, traceback
 from proto import WindData
 
-DATA_SIZE = WindData().size + 4
+DATA_SIZE = WindData.size + 4
 DB_LOCK = False
 
 TIME_FRAME = 5
