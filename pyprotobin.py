@@ -2,7 +2,7 @@ import argparse
 from enum import Enum
 
 AST = []
-ALL_STRUCTS = {}
+STRUCT_SIZES = {}
 
 class Lang(Enum):
     STRUCT_PACK = 0
@@ -43,7 +43,7 @@ def parse_input(input_file: str):
         AST.append(obj)
 
 def type_check(ctype, obj):
-    if ctype not in struct_symbols and ctype not in ALL_STRUCTS:
+    if ctype not in struct_symbols and ctype not in STRUCT_SIZES:
         raise ValueError(f"Unknown type '{ctype}' in struct '{obj['obj']}'")
 
 def generate_python_classes():
@@ -57,11 +57,11 @@ def generate_python_classes():
         size = sum(
             struct_symbols[x[1]][Lang.SIZE.value]
             if x[1] in struct_symbols
-            else ALL_STRUCTS[x[1]][0]
+            else STRUCT_SIZES[x[1]]
             for x in items
         )
 
-        ALL_STRUCTS.update({obj['obj'] : (size , obj)})
+        STRUCT_SIZES.update({obj['obj'] : size})
 
         res += f"    size = {size}\n\n"
         res += f"    def __init__(self, "
@@ -72,6 +72,7 @@ def generate_python_classes():
 
         for param, _ in items:
             res += f"        self.{param} = {param}\n"
+        res += "\n"
         
         # from_binary ---------------------------------------------------------------
 
@@ -83,8 +84,8 @@ def generate_python_classes():
             type_check(ctype, obj)
             if ctype not in struct_symbols.keys():
                 res += f"        self.{param} = {ctype}()\n"
-                res += f"        self.{param}.from_binary(data[{count}:{count + ALL_STRUCTS[ctype][0]}]) \n"
-                count += ALL_STRUCTS[ctype][0]
+                res += f"        self.{param}.from_binary(data[{count}:{count + STRUCT_SIZES[ctype]}]) \n"
+                count += STRUCT_SIZES[ctype]
             else:
                 ctype_s = struct_symbols[ctype]
                 res += f"        self.{param} = struct.unpack('<{ctype_s[Lang.STRUCT_PACK.value]}', data[{count}:{count + ctype_s[Lang.SIZE.value]}])[0]\n"

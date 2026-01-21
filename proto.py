@@ -14,6 +14,7 @@ class WindData:
         self.bmp = bmp
         self.batteryVolts = batteryVolts
         self.windDirection = windDirection
+
     def from_binary(self, data):
         if len(data) < self.size:
            raise ValueError(f'Insufficient data for {self.__class__.__name__}') 
