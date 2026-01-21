@@ -1,6 +1,7 @@
-import struct, time, traceback
-with open("data.size", "r") as f:
-    DATA_SIZE = int(f.read()) + 4 # 4 bytes of epoch
+import time, traceback
+from proto import WindData
+
+DATA_SIZE = WindData().size + 4
 DB_LOCK = False
 
 TIME_FRAME = 5
@@ -32,35 +33,6 @@ def truncate_db_size():
         traceback.print_exception(e)
     DB_LOCK = False
 
-def shift_data(data, window, inc):
-    res = data[window[0]:window[1]]
-    window[0] += inc
-    window[1] += inc
-    return res
-
-def unpack_data(data):
-    window = [0, 4]
-    wind_speed_open  = struct.unpack('f', shift_data(data, window, 4))[0]
-    wind_speed_close = struct.unpack('f', shift_data(data, window, 4))[0]
-    wind_speed_high  = struct.unpack('f', shift_data(data, window, 4))[0]
-    wind_speed_low   = struct.unpack('f', shift_data(data, window, 4))[0]
-    wind_mean        = struct.unpack('f', shift_data(data, window, 4))[0]
-    temperature      = struct.unpack('f', shift_data(data, window, 4))[0]
-    humidity         = struct.unpack('f', shift_data(data, window, 4))[0]
-    bmp              = struct.unpack('f', shift_data(data, window, 4))[0]
-    battery          = struct.unpack('f', shift_data(data, window, 4))[0]
-    wind_dir         = struct.unpack('f', shift_data(data, window, 4))[0]
-    return (wind_speed_open,
-            wind_speed_close,
-            wind_speed_high,
-            wind_speed_low,
-            wind_mean,
-            temperature,
-            humidity,
-            bmp,
-            battery,
-            wind_dir)
-
                 
 def write_to_db(wind_speed_open, wind_speed_close, wind_speed_high, wind_speed_low, wind_mean,
                 temperature,
@@ -81,17 +53,9 @@ def write_to_db(wind_speed_open, wind_speed_close, wind_speed_high, wind_speed_l
             db.close()
             db = open("database.bin", "wb")
         data = bytearray()
-        data += int(time.time()).to_bytes(4, byteorder='big')
-        data += struct.pack('f', wind_speed_open)
-        data += struct.pack('f', wind_speed_close)
-        data += struct.pack('f', wind_speed_high)
-        data += struct.pack('f', wind_speed_low)
-        data += struct.pack('f', wind_mean)
-        data += struct.pack('f', temperature)
-        data += struct.pack('f', humidity)
-        data += struct.pack('f', bmp)
-        data += struct.pack('f', battery)
-        data += struct.pack('f', wind_dir)
+        data += int(time.time()).to_bytes(4, byteorder='little')
+        w = WindData(wind_speed_open, wind_speed_close, wind_speed_high, wind_speed_low, wind_mean, temperature, humidity, bmp, battery, wind_dir)
+        data += w.get_binary()
         db.write(data)
         db.close()
     except Exception as e:
@@ -114,8 +78,10 @@ def read_from_db():
                 window = dbbytes[start:end]
                 start += DATA_SIZE
                 end += DATA_SIZE
-                epoch = int.from_bytes(window[:4], byteorder='big')
+                epoch = int.from_bytes(window[:4], byteorder='little')
                 window = window[4:]
+                w = WindData()
+                w.from_binary(window)
                 (wind_speed_open,
                 wind_speed_close,
                 wind_speed_high,
@@ -125,7 +91,7 @@ def read_from_db():
                 humidity,
                 bmp,
                 battery,
-                wind_dir) = unpack_data(window)
+                wind_dir) = w.get_values()
                 result.append([
                     epoch,
                     wind_speed_open, wind_speed_close, wind_speed_high, wind_speed_low, wind_mean,

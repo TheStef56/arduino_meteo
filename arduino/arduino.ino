@@ -26,7 +26,7 @@ void loop() {
   if (count*WIND_MEASURING_INTERVAL > DATA_SENDING_INTERVAL) {
     BMEData bme = getBMEdata();
     sendData(
-      (Data){
+      (WindData){
       .windSpeedOpen  = windOpen,
       .windSpeedClose = getWindSpeedKmH(),
       .windSpeedHigh  = windMax,
@@ -53,6 +53,6 @@ void loop() {
   count++;
 }
 
-void sendData(Data data) {
-  sendWifiMessageEnc(HOST, PORT, (uint8_t*)(void*)&data, sizeof(Data), AES_KEY, sizeof(AES_KEY));
+void sendData(WindData data) {
+  sendWifiMessageEnc(HOST, PORT, (uint8_t*)(void*)&data, sizeof(WindData), AES_KEY, sizeof(AES_KEY));
 }
