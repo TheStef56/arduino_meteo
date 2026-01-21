@@ -82,24 +82,9 @@ def read_from_db():
                 window = window[4:]
                 w = WindData()
                 w.from_binary(window)
-                (wind_speed_open,
-                wind_speed_close,
-                wind_speed_high,
-                wind_speed_low,
-                wind_mean,
-                temperature,
-                humidity,
-                bmp,
-                battery,
-                wind_dir) = w.get_values()
                 result.append([
                     epoch,
-                    wind_speed_open, wind_speed_close, wind_speed_high, wind_speed_low, wind_mean,
-                    temperature,
-                    humidity,
-                    bmp,
-                    battery,
-                    wind_dir,
+                    *w.get_values()
                 ])
     except Exception as e:
         traceback.print_exception(e)
