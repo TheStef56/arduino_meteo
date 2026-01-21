@@ -4,10 +4,10 @@ from Crypto.Cipher import AES
 from flask import Flask, render_template
 from mydb import *
 from env import AES_KEY, HOST, SOCKET_PORT, WEB_PORT
+from proto import WindData
 
 app = Flask(__name__)
-with open("data.size", "r") as f:
-    DATA_SIZE = int(f.read()) 
+DATA_SIZE = WindData().size 
 
 DATACHANGED = False
 

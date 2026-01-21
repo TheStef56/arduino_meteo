@@ -1,0 +1,11 @@
+struct WindData:
+  windSpeedOpen float
+  windSpeedClose float
+  windSpeedHigh float
+  windSpeedLow float
+  windMean float
+  temperature float
+  humidity float
+  bmp float
+  batteryVolts float
+  windDirection float

@@ -23,18 +23,7 @@ int DATA_SENDING_INTERVAL   = 5*60*1000; // 5 min
 #define ledPrintInit()   LED_MATRIX.begin()
 #define ledPrintDeInit() LED_MATRIX.end()
 
-typedef struct __attribute__((packed)) {
-  float windSpeedOpen;
-  float windSpeedClose;
-  float windSpeedHigh;
-  float windSpeedLow;
-  float windMean;
-  float temperature;
-  float humidity;
-  float bmp;
-  float batteryVolts;
-  float windDirection;
-} Data;
+#include "proto.h"
 
 typedef enum {
   NOTHING   = 0,

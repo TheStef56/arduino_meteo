@@ -1,6 +1,7 @@
 import time, random, struct
-with open("data.size", "r") as f:
-    DATA_SIZE = int(f.read()) 
+from proto import WindData
+
+DATA_SIZE = WindData().size
 
 def write_to_db(now,
                 temperature,
@@ -19,17 +20,20 @@ def write_to_db(now,
             db.close()
             db = open("database.bin", "wb")
         data = bytearray()
-        data += int(now).to_bytes(4, byteorder='big')
-        data += struct.pack('f', wind_speed_open)
-        data += struct.pack('f', wind_speed_close)
-        data += struct.pack('f', wind_speed_high)
-        data += struct.pack('f', wind_speed_low)
-        data += struct.pack('f', wind_speed_mean)
-        data += struct.pack('f', temperature)
-        data += struct.pack('f', humidity)
-        data += struct.pack('f', bmp)
-        data += struct.pack('f', battery)
-        data += struct.pack('f', wind_dir)
+        data += int(now).to_bytes(4, byteorder='little')
+        w = WindData(
+            wind_speed_open,
+            wind_speed_close,
+            wind_speed_high,
+            wind_speed_low,
+            wind_speed_mean,
+            temperature,
+            humidity,
+            bmp,
+            battery,
+            wind_dir
+        )
+        data += w.get_binary()
         db.write(data)
         db.close()
     except Exception as e:
@@ -37,7 +41,7 @@ def write_to_db(now,
 
 now = time.time()
 now -= 3600*24*30
-times = 12*24*30
+times = 12*24*3
 for x in range(times):
     now += 5*60+ (random.random()*120-60)
     write_to_db(
