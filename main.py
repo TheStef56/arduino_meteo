@@ -86,39 +86,25 @@ def socket_listener():
                 auth_tag = data[DATA_SIZE+12:]
                 aesgcm = AES.new(AES_KEY, AES.MODE_GCM, nonce=nonce)
                 decrypted = aesgcm.decrypt_and_verify(crypted, auth_tag)
-                (wind_speed_open,
-                wind_speed_close,
-                wind_speed_high,
-                wind_speed_low,
-                wind_mean,
-                temperature,
-                humidity,
-                bmp,
-                battery,
-                wind_dir) = unpack_data(decrypted)
+                w = WindData()
+                w.from_binary(decrypted)
 
                 print(f"""
         timestamp:      : {datetime.now().strftime("%H:%M:%S")}
-        wind_speed_open : {wind_speed_open}km/h
-        wind_speed_close: {wind_speed_close}km/h
-        wind_speed_high : {wind_speed_high}km/h
-        wind_speed_low  : {wind_speed_low}km/h
-        wind_mean       : {wind_mean}km/h
-        temperature     : {temperature}°C
-        humidity        : {humidity}%
-        bmp             : {bmp}hPa
-        battery         : {battery}V
-        wind_dir        : {wind_dir}
+        wind_speed_open : {w.windSpeedOpen}km/h
+        wind_speed_close: {w.windSpeedClose}km/h
+        wind_speed_high : {w.windSpeedHigh}km/h
+        wind_speed_low  : {w.windSpeedLow}km/h
+        wind_mean       : {w.windMean}km/h
+        temperature     : {w.temperature}°C
+        humidity        : {w.humidity}%
+        bmp             : {w.bmp}hPa
+        battery         : {w.batteryVolts}V
+        wind_dir        : {w.windDirection}
                 """)
                 conn.close()
 
-                write_to_db(wind_speed_open, wind_speed_close, wind_speed_high, wind_speed_low, wind_mean,
-                            temperature,
-                            humidity,
-                            bmp,
-                            battery,
-                            wind_dir
-                            )
+                write_to_db(*w.get_values())
                 DATACHANGED = True
         except Exception as e:
             traceback.print_exception(e)
