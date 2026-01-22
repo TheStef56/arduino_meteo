@@ -29,21 +29,7 @@ class WindData:
         self.batteryVolts = struct.unpack('<f', data[32:36])[0]
         self.windDirection = struct.unpack('<f', data[36:40])[0]
 
-    def get_values(self):
-        return (
-            self.windSpeedOpen,
-            self.windSpeedClose,
-            self.windSpeedHigh,
-            self.windSpeedLow,
-            self.windMean,
-            self.temperature,
-            self.humidity,
-            self.bmp,
-            self.batteryVolts,
-            self.windDirection,
-        )
-
-    def get_binary(self):
+    def to_binary(self):
         data = bytearray()
         data += struct.pack('<f', self.windSpeedOpen)
         data += struct.pack('<f', self.windSpeedClose)
@@ -57,3 +43,16 @@ class WindData:
         data += struct.pack('<f', self.windDirection)
         return data
 
+    def values(self):
+        return (
+            self.windSpeedOpen,
+            self.windSpeedClose,
+            self.windSpeedHigh,
+            self.windSpeedLow,
+            self.windMean,
+            self.temperature,
+            self.humidity,
+            self.bmp,
+            self.batteryVolts,
+            self.windDirection,
+        )

@@ -46,7 +46,7 @@ def write_to_db(windData: WindData):
             db = open("database.bin", "wb")
         data = bytearray()
         data += int(time.time()).to_bytes(4, byteorder='little')
-        data += windData.get_binary()
+        data += windData.to_binary()
         db.write(data)
         db.close()
     except Exception as e:
@@ -75,7 +75,7 @@ def read_from_db():
                 w.from_binary(window)
                 result.append([
                     epoch,
-                    *w.get_values()
+                    *w.values()
                 ])
     except Exception as e:
         traceback.print_exception(e)
