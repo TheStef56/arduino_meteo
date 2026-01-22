@@ -1,0 +1,3 @@
+[submodule "PyProtoBin"]
+	path = PyProtoBin
+	url = https://github.com/TheStef56/PyProtoBin
