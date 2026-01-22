@@ -104,7 +104,7 @@ def socket_listener():
                 """)
                 conn.close()
 
-                write_to_db(*w.get_values())
+                write_to_db(w)
                 DATACHANGED = True
         except Exception as e:
             traceback.print_exception(e)

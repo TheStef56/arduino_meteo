@@ -8,7 +8,6 @@ TIME_FRAME = 5
 MAX_TIME_SPAN = 60*60*24*30
 MAX_SIZE = int(MAX_TIME_SPAN*DATA_SIZE/TIME_FRAME)
 
-
 def check_for_lock():
     global DB_LOCK
     while DB_LOCK:
@@ -32,15 +31,8 @@ def truncate_db_size():
     except Exception as e:
         traceback.print_exception(e)
     DB_LOCK = False
-
                 
-def write_to_db(wind_speed_open, wind_speed_close, wind_speed_high, wind_speed_low, wind_mean,
-                temperature,
-                humidity,
-                bmp,
-                battery,
-                wind_dir
-                ):
+def write_to_db(windData: WindData):
     global DATA_SIZE, DB_LOCK
     check_for_lock()
     truncate_db_size()
@@ -54,8 +46,7 @@ def write_to_db(wind_speed_open, wind_speed_close, wind_speed_high, wind_speed_l
             db = open("database.bin", "wb")
         data = bytearray()
         data += int(time.time()).to_bytes(4, byteorder='little')
-        w = WindData(wind_speed_open, wind_speed_close, wind_speed_high, wind_speed_low, wind_mean, temperature, humidity, bmp, battery, wind_dir)
-        data += w.get_binary()
+        data += windData.get_binary()
         db.write(data)
         db.close()
     except Exception as e:

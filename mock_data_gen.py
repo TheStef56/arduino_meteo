@@ -3,14 +3,7 @@ from proto import WindData
 
 DATA_SIZE = WindData.size
 
-def write_to_db(now,
-                temperature,
-                humidity,
-                wind_speed_open, wind_speed_close, wind_speed_high, wind_speed_low, wind_speed_mean,
-                wind_dir,
-                bmp,
-                battery
-                ):
+def write_to_db(now, windData: WindData):
     global DATA_SIZE
     try:
         db = open("database.bin", "ab+")
@@ -21,39 +14,29 @@ def write_to_db(now,
             db = open("database.bin", "wb")
         data = bytearray()
         data += int(now).to_bytes(4, byteorder='little')
-        w = WindData(
-            wind_speed_open,
-            wind_speed_close,
-            wind_speed_high,
-            wind_speed_low,
-            wind_speed_mean,
-            temperature,
-            humidity,
-            bmp,
-            battery,
-            wind_dir
-        )
-        data += w.get_binary()
+        data += windData.get_binary()
         db.write(data)
         db.close()
     except Exception as e:
         print(e)
 
-now = time.time()
-now -= 3600*24*30
-times = 12*24*3
-for x in range(times):
+now    = time.time()
+now   -= 3600*24*30
+times  = 12*24*3
+for x in range(times): 
     now += 5*60+ (random.random()*120-60)
     write_to_db(
         now,
-        wind_speed_open  = random.random()*60,
-        wind_speed_close = random.random()*60,
-        wind_speed_high  = random.random()*60,
-        wind_speed_low   = random.random()*60,
-        wind_speed_mean  = random.random()*60,
-        temperature      = random.random()*40 - 5,
-        humidity         = random.random()*100,
-        bmp              = random.random()*12 + 1012,
-        battery          = random.random()*3 + 11, 
-        wind_dir         = random.random()*360
+        WindData(
+            windSpeedOpen  = random.random()*60,
+            windSpeedClose = random.random()*60,
+            windSpeedHigh  = random.random()*60,
+            windSpeedLow   = random.random()*60,
+            windMean       = random.random()*60,
+            temperature    = random.random()*40 - 5,
+            humidity       = random.random()*100,
+            bmp            = random.random()*12 + 1012,
+            batteryVolts   = random.random()*3 + 11,
+            windDirection  = random.random()*360
+        )
     )
