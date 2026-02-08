@@ -1,6 +1,8 @@
+#define SERIAL_DEBUG
 #include "ctx.h"
 #include "env.h"
 #include "wifiMessage.h"
+#include "simMessage.h"
 #include "sensors.h"
 
 size_t count = 0;
@@ -8,6 +10,8 @@ float windMean = 0.f;
 float windOpen = 0.f;
 float windMax = 0.f;
 float windMin = 9999.f;
+
+void (*sendData)(WindData data);
 
 void setup() {
   ledPrintInit();
@@ -19,7 +23,15 @@ void setup() {
   )
   setupBme();
   selectMode(5000, 300);
-  setupWifi();
+  
+  if (SETTINGS & SIM) {
+    Serial1.begin(115200);
+    sendData = sendSimData;
+  }
+  if (SETTINGS & WIFI) {
+    setupWifi();
+    sendData = sendWifiData;
+  }
 }
 
 void loop() {
@@ -53,6 +65,10 @@ void loop() {
   count++;
 }
 
-void sendData(WindData data) {
-  sendWifiMessageEnc(HOST, PORT, (uint8_t*)(void*)&data, sizeof(WindData), AES_KEY, sizeof(AES_KEY));
+void sendSimData(WindData data) {
+  sendSimMessageEnc(REMOTE_HOST, REMOTE_PORT, (uint8_t*)(void*)&data, sizeof(WindData), AES_KEY, sizeof(AES_KEY));
+}
+
+void sendWifiData(WindData data) {
+  sendWifiMessageEnc(WIFI_HOST, WIFI_PORT, (uint8_t*)(void*)&data, sizeof(WindData), AES_KEY, sizeof(AES_KEY));
 }

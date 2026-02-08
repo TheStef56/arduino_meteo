@@ -1,6 +1,7 @@
 #ifndef WIFI_MESSAGE_H
 #define WIFI_MESSAGE_H
 
+#include "ctx.h"
 #include <Crypto.h>
 #include <AES.h>
 #include <GCM.h>
@@ -53,7 +54,7 @@ void setupWifi() {
   IF_SERIAL_DEBUG(printWifiStatus());
 }
 
-int sendWifiMessage(const char *ip, int port, uint8_t *message, size_t size) {
+void sendWifiMessage(const char *ip, int port, uint8_t *message, size_t size) {
   while (1) {  
     WiFiClient client;  
     int res = client.connect(ip, port);
@@ -62,7 +63,6 @@ int sendWifiMessage(const char *ip, int port, uint8_t *message, size_t size) {
       IF_LED_DEBUG(ledPrint("    Connection to socket!", true));
       client.write(message, size);
       client.stop();
-      return 1;
     } else {
       IF_SERIAL_DEBUG(Serial.print("Connection to socket failed: "));
       IF_SERIAL_DEBUG(Serial.println(res));
@@ -74,7 +74,7 @@ int sendWifiMessage(const char *ip, int port, uint8_t *message, size_t size) {
   }
 }
 
-int sendWifiMessageEnc(const char *ip, int port, uint8_t *message, size_t size, uint8_t *aes_key, size_t aes_size) {
+void sendWifiMessageEnc(const char *ip, int port, uint8_t *message, size_t size, uint8_t *aes_key, size_t aes_size) {
   GCM<AES256> gcm;     // GCM mode
   
   uint8_t nonce[12];
@@ -95,7 +95,7 @@ int sendWifiMessageEnc(const char *ip, int port, uint8_t *message, size_t size, 
   memcpy(fullPayload + sizeof(encrypted)                 , &nonce     , sizeof(nonce));
   memcpy(fullPayload + sizeof(encrypted) +  sizeof(nonce), &authTag  ,  sizeof(authTag));
 
-  return sendWifiMessage(ip, port, (byte*)(void*)&fullPayload, sizeof(fullPayload));
+  sendWifiMessage(ip, port, (byte*)(void*)&fullPayload, sizeof(fullPayload));
 }
 
 #endif // WIFI_MESSAGE_H

@@ -6,6 +6,17 @@ from mydb import *
 from env import AES_KEY, HOST, SOCKET_PORT, WEB_PORT
 from proto import WindData
 
+# env.py example:
+
+# HOST = '0.0.0.0'
+# SOCKET_PORT = 9000
+# WEB_PORT = 5000
+# AES_KEY = bytes([1,1,1,1,1,1,1,1
+#                 1,1,1,1,1,1,1,1,1,
+#                  1,1,1,1,1,1,1,1
+#                 1,1,1,1,1,1,1,1,1,
+#                  ])
+
 app = Flask(__name__)
 DATA_SIZE = WindData.size 
 

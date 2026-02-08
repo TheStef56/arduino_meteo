@@ -4,13 +4,26 @@
 #include <ArduinoGraphics.h>
 #include <Arduino_LED_Matrix.h>
 
-char HOST[] = "192.168.0.101";
-int PORT = 9000;
+// EXAMPLE env:
+
+// char REMOTE_HOST[] = "example.com";
+// int REMOTE_PORT = 9000;
+// char WIFI_HOST[] = "192.168.0.1";
+// int WIFI_PORT = 9000;
+// #define WIFI_SSID "example"
+// #define WIFI_PASSWORD "12345678"
+
+// uint8_t AES_KEY[32] = {
+//   0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
+//   0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
+//   0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
+//   0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01
+// };
+
 
 int WIND_MEASURING_INTERVAL = 5*1000;    // 5 sec
 int DATA_SENDING_INTERVAL   = 5*60*1000; // 5 min
 
-// #define SERIAL_DEBUG
 #ifdef SERIAL_DEBUG
   #define IF_SERIAL_DEBUG(serial) serial
 #else
@@ -106,7 +119,7 @@ void makeSettings() {
 
 void selectMode(uint32_t waitTime, uint32_t blinkInterval) {
   uint32_t startTime = millis();
-  Mode mode = WIFI_NO_LED_DEBUG;                                // default mode
+  Mode mode = SIM_LED_DEBUG;                                // default mode
   pinMode(MODE_SELECT_PIN, INPUT_PULLUP);
   PinStatus prevRead = digitalRead(MODE_SELECT_PIN);
   
