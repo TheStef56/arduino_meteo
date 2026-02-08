@@ -119,7 +119,7 @@ void makeSettings() {
 
 void selectMode(uint32_t waitTime, uint32_t blinkInterval) {
   uint32_t startTime = millis();
-  Mode mode = SIM_LED_DEBUG;                                // default mode
+  Mode mode = SIM_DEBUG;                                // default mode
   pinMode(MODE_SELECT_PIN, INPUT_PULLUP);
   PinStatus prevRead = digitalRead(MODE_SELECT_PIN);
   
