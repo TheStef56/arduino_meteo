@@ -16,6 +16,8 @@ bool sendATCommand(const char *cmd, unsigned long timeoutMs = 2000) {
             String line = Serial1.readStringUntil('\n');
             line.trim();
             if (line.length() == 0) continue;
+            IF_SERIAL_DEBUG(Serial.print(cmd));
+            IF_SERIAL_DEBUG(Serial.print(" -> "));
             IF_SERIAL_DEBUG(Serial.println(line));
 
             if (line == "OK") okReceived = true;
@@ -25,28 +27,42 @@ bool sendATCommand(const char *cmd, unsigned long timeoutMs = 2000) {
     return okReceived;
 }
 
-int sendSimMessage(const char *ip, int port, uint8_t *message, size_t size, unsigned long timeoutMs = 10000) {
+void sendSimMessage(const char *ip, int port, uint8_t *message, size_t size, unsigned long timeoutMs = 10000) {
     char buf[128];
     bool success = false;
 
-    sendATCommand("AT");                                            // wake module
-    sendATCommand("ATE0");                                          // disable echo
-    sendATCommand("AT+CFUN=1");                                     // full functionality
-    snprintf(buf, 128, "AT+CGDCONT=1,\"IP\",\"internet.wind\"");    // set APN
-    sendATCommand(buf);
-    sendATCommand("AT+CSQ");                                        // signal quality
-    sendATCommand("AT+CREG?");                                      // network registration
-    sendATCommand("AT+CIPMODE=1");                                  // transparentmode
-    sendATCommand("AT+NETOPEN");                                    // start tcpcip socket mode
-    snprintf(buf, 128, "AT+CIPOPEN=0,\"TCP\",\"%s\",%d", ip, port);
-    sendATCommand(buf);                                             // connect to endpoint
-    Serial1.write(message, size);                                   // send data
-    Serial1.flush();                                                     
-    delay(1000); 
-    sendATCommand("AT+CIPCLOSE=0");                                 // close socket
-    sendATCommand("AT+NETCLOSE");                                   // stop tcpip socket mode
-    sendATCommand("AT+CSCLK=1");                                    // go to sleep
-    return 0;
+    while (!success) {
+        sendATCommand("AT");                                            // wake module
+        sendATCommand("ATE0");                                          // disable echo
+        sendATCommand("AT+CFUN=1");                                     // full functionality
+        snprintf(buf, 128, "AT+CGDCONT=1,\"IP\",\"internet.wind\"");    // set APN
+        sendATCommand(buf);
+        // sendATCommand("AT+CSQ");                                     // signal quality. just for debugging.
+        // sendATCommand("AT+CREG?");                                   // network registration. just for debugging.
+        sendATCommand("AT+CIPMODE=1");                                  // transparentmode
+        sendATCommand("AT+NETOPEN");                                    // start tcpcip socket mode
+        snprintf(buf, 128, "AT+CIPOPEN=0,\"TCP\",\"%s\",%d", ip, port);
+        sendATCommand(buf);                                             // connect to endpoint
+        Serial1.write(message, size);                                   // send data
+        Serial1.flush();                                                     
+        delay(1000); 
+        // sendATCommand("AT+CIPCLOSE=0");                              // close socket. we are closing it server side, no need for it. and netclose, would tear it down anyway
+
+        // check for socket close from server to ensure data has been received ------------
+        unsigned long start = millis();
+        while (millis() - start < 3000) {
+            while (Serial1.available()) {
+                String line = Serial1.readStringUntil('\n');
+                line.trim();
+                if (line == "CLOSED") success = true;
+            }
+        }
+        IF_SERIAL_DEBUG(Serial.print("SUCCESS: "));
+        IF_SERIAL_DEBUG(Serial.println(success));
+        // --------------------------------------------------------------------------------
+        sendATCommand("AT+NETCLOSE");                                   // stop tcpip socket mode
+        sendATCommand("AT+CSCLK=1");                                    // go to sleep
+    }
 }
 
 // --- Encrypted send ---
