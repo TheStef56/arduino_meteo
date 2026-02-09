@@ -32,9 +32,22 @@ float denoisedAnalogRead(int pin) {
   return avg;
 }
 
-#define getBatteryVoltage() denoisedAnalogRead(BATTERY_ANALOG)*50/1023.0f
-#define getWindDirectionDegrees() denoisedAnalogRead(WIND_DIR_ANALOG)*360/1023.0f
-#define getWindSpeedKmH() denoisedAnalogRead(ANEMOMETER_ANALOG)*252/1023.0f
+float readVcc() {
+  // Read 1.1V internal reference against Vcc
+  ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);  // select 1.1V (internal) as input
+  delay(2);                                                // let voltage settle
+  ADCSRA |= _BV(ADSC);                                     // start conversion
+  while (bit_is_set(ADCSRA, ADSC));                        // wait for completion
+  int result = ADC;                                        // ADC value
+
+  // Calculate Vcc in volts
+  float vcc = 1.1 * 1023.0 / result;  // 1.1V reference
+  return vcc;
+}
+
+#define getBatteryVoltage() denoisedAnalogRead(BATTERY_ANALOG)*readVcc()*10/1023.0f
+#define getWindDirectionDegrees() denoisedAnalogRead(WIND_DIR_ANALOG)*readVcc()*360/(5*1023.0f)
+#define getWindSpeedKmH() denoisedAnalogRead(ANEMOMETER_ANALOG)*readVcc()*252/(5*1023.0f)
 
 void setupBme() {
   if (!BME.begin(D2, D3, 0x76)) {  // Try 0x76 or 0x77 depending on the module

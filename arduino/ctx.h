@@ -25,10 +25,11 @@ int WIND_MEASURING_INTERVAL = 5*1000;    // 5 sec
 int DATA_SENDING_INTERVAL   = 5*60*1000; // 5 min
 
 #ifdef SERIAL_DEBUG
-  #define IF_SERIAL_DEBUG(serial) serial
+  #define IF_SERIAL_DEBUG(fn) do {if (SETTINGS & DEBUG) {fn;}} while (0)
 #else
   #define IF_SERIAL_DEBUG(serial)
 #endif
+
 
 #define IF_LED_DEBUG(fn) do {if (SETTINGS & LED_DEBUG) {fn;}} while (0)
 #define MODE_SELECT_PIN 13
