@@ -11,16 +11,22 @@ float windOpen = 0.f;
 float windMax = 0.f;
 float windMin = 9999.f;
 
+#define MOSFET_PIN 4
 void (*sendData)(WindData data);
 
 void setup() {
   ledPrintInit();
+  
+  // switch off mosfet
+  pinMode(MOSFET_PIN, OUTPUT);
+  digitalWrite(4, LOW);
+
   IF_SERIAL_DEBUG(
     Serial.begin(9600);
     while (!Serial) {
       ledPrint("SERIAL FAIL", true);
     };
-  )
+  );
   setupBme();
   selectMode(5000, 300);
   
@@ -66,7 +72,9 @@ void loop() {
 }
 
 void sendSimData(WindData data) {
+  digitalWrite(MOSFET_PIN, HIGH);
   sendSimMessageEnc(REMOTE_HOST, REMOTE_PORT, (uint8_t*)(void*)&data, sizeof(WindData), AES_KEY, sizeof(AES_KEY));
+  digitalWrite(MOSFET_PIN, LOW);
 }
 
 void sendWifiData(WindData data) {
