@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import json, socket, threading
 from datetime import datetime
 from Crypto.Cipher import AES

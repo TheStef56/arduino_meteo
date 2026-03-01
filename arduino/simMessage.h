@@ -34,11 +34,12 @@ void sendSimMessage(const char *ip, int port, uint8_t *message, size_t size, uns
     while (!success) {
         sendATCommand("AT");                                            // wake module
         sendATCommand("ATE0");                                          // disable echo
+        sendATCommand("AT+CPIN=\""SIM_PIN"\"");
         sendATCommand("AT+CFUN=1");                                     // full functionality
-        snprintf(buf, 128, "AT+CGDCONT=1,\"IP\",\"internet.wind\"");    // set APN
+        snprintf(buf, 128, "AT+CGDCONT=1,\"IP\",\""APN"\"");            // set APN
         sendATCommand(buf);
-        // sendATCommand("AT+CSQ");                                     // signal quality. just for debugging.
-        // sendATCommand("AT+CREG?");                                   // network registration. just for debugging.
+        sendATCommand("AT+CSQ");                                        // signal quality. just for debugging.
+        sendATCommand("AT+CREG?");                                      // network registration. just for debugging.
         sendATCommand("AT+CIPMODE=1");                                  // transparentmode
         sendATCommand("AT+NETOPEN");                                    // start tcpcip socket mode
         snprintf(buf, 128, "AT+CIPOPEN=0,\"TCP\",\"%s\",%d", ip, port);

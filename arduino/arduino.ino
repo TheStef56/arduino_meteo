@@ -4,6 +4,25 @@
 #include "wifiMessage.h"
 #include "simMessage.h"
 #include "sensors.h"
+// EXAMPLE env.h:
+
+// char REMOTE_HOST[] = "example.com";
+// int REMOTE_PORT = 9000;
+// char WIFI_HOST[] = "192.168.0.1";
+// int WIFI_PORT = 9000;
+// #define WIFI_SSID "example"
+// #define WIFI_PASSWORD "12345678"
+// #define APN "example.it"
+// #define SIM_PIN "1234"
+
+// uint8_t AES_KEY[32] = {
+//   0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
+//   0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
+//   0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
+//   0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01
+// };
+
+#define MOSFET_PIN 4
 
 size_t count = 0;
 float windMean = 0.f;
@@ -11,7 +30,6 @@ float windOpen = 0.f;
 float windMax = 0.f;
 float windMin = 9999.f;
 
-#define MOSFET_PIN 4
 void (*sendData)(WindData data);
 
 void setup() {
@@ -21,15 +39,16 @@ void setup() {
   pinMode(MOSFET_PIN, OUTPUT);
   digitalWrite(4, LOW);
 
+  setupBme();
+  selectMode(5000, 300);
+
   IF_SERIAL_DEBUG(
     Serial.begin(9600);
     while (!Serial) {
       ledPrint("SERIAL FAIL", true);
     };
   );
-  setupBme();
-  selectMode(5000, 300);
-  
+
   if (SETTINGS & SIM) {
     Serial1.begin(115200);
     sendData = sendSimData;

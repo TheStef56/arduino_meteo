@@ -63,6 +63,7 @@ void sendWifiMessage(const char *ip, int port, uint8_t *message, size_t size) {
       IF_LED_DEBUG(ledPrint("    Connection to socket!", true));
       client.write(message, size);
       client.stop();
+      break;
     } else {
       IF_SERIAL_DEBUG(Serial.print("Connection to socket failed: "));
       IF_SERIAL_DEBUG(Serial.println(res));
