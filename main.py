@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import json, socket, threading
+import json, socket, threading, sys
 from datetime import datetime
 from Crypto.Cipher import AES
 from flask import Flask, render_template
@@ -9,6 +9,8 @@ from proto import WindData
 
 # env.py example:
 
+# KEYFILE="/etc/letsencrypt/live/mydomain/privkey.pem"
+# CERTFILE="/etc/letsencrypt/live/mydomain/fullchain.pem"
 # PATH = "~/arduino_meteo"
 # HOST = '0.0.0.0'
 # SOCKET_PORT = 9000
@@ -148,5 +150,12 @@ def data_changed():
         return "no"
 
 if __name__ == '__main__':
+    from gevent import pywsgi
+    from env import KEYFILE, CERTFILE
     threading.Thread(target=socket_listener, daemon=True).start()
-    app.run(host=HOST, port=WEB_PORT)
+    http_server = pywsgi.WSGIServer((HOST, WEB_PORT),
+                                app,
+                                keyfile=KEYFILE,
+                                certfile=CERTFILE,
+                                log=sys.stderr)
+    http_server.serve_forever()

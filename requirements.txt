@@ -1,1 +1,2 @@
 pycryptodome==3.23.0
+gevent==25.8.2
