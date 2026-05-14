@@ -9,6 +9,7 @@ from proto import WindData
 
 # env.py example:
 
+# PATH = "~/arduino_meteo"
 # HOST = '0.0.0.0'
 # SOCKET_PORT = 9000
 # WEB_PORT = 5000

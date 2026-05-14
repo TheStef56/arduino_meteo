@@ -1,4 +1,5 @@
 import time, traceback
+from env import PATH
 from proto import WindData
 
 DATA_SIZE = WindData.size + 4
@@ -19,13 +20,13 @@ def truncate_db_size():
     DB_LOCK = True
     data = []
     try:
-        with open("database.bin", "rb") as db:
+        with open(f"{PATH}/database.bin", "rb") as db:
             data = db.read()
             old_size = len(data)
             if  old_size > MAX_SIZE:
                 new_size = int(((MAX_SIZE * 0.1)//DATA_SIZE)*DATA_SIZE)
                 data = data[old_size - new_size:]
-        with open("database.bin", "wb") as db:
+        with open(f"{PATH}/database.bin", "wb") as db:
             if len(data) > 0:
                 db.write(data)
     except Exception as e:
@@ -38,12 +39,12 @@ def write_to_db(windData: WindData):
     truncate_db_size()
     DB_LOCK = True
     try:
-        db = open("database.bin", "ab+")
+        db = open(f"{PATH}/database.bin", "ab+")
         old_data = db.read()
         if len(old_data) % DATA_SIZE != 0:
-            print(f"ERROR: Invalid Database Size: {len(old_data)}")
+            print(f"ERROR: Invalidf {PATH}Database Size: {len(old_data)}")
             db.close()
-            db = open("database.bin", "wb")
+            db = open(f"{PATH}/database.bin", "wb")
         data = bytearray()
         data += int(time.time()).to_bytes(4, byteorder='little')
         data += windData.to_binary()
@@ -59,10 +60,10 @@ def read_from_db():
     DB_LOCK = True
     result = []
     try:
-        with open("database.bin", "rb") as db:
+        with open(f"{PATH}/database.bin", "rb") as db:
             dbbytes = db.read()
             if len(dbbytes) % DATA_SIZE != 0:
-                print(f"ERROR: Invalid Database Size: {len(dbbytes)}")
+                print(f"ERROR: Invalidf {PATH}Database Size: {len(dbbytes)}")
             start = 0
             end = DATA_SIZE
             while end <= len(dbbytes):
