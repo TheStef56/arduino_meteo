@@ -6,6 +6,8 @@ from flask import Flask, render_template
 from mydb import *
 from env import AES_KEY, HOST, SOCKET_PORT, WEB_PORT
 from proto import WindData
+from datetime import datetime
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # env.py example:
 
@@ -22,6 +24,13 @@ from proto import WindData
 #                  ])
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(
+    app.wsgi_app,
+    x_for=1,
+    x_proto=1,
+    x_host=1
+)
+
 DATA_SIZE = WindData.size 
 
 DATACHANGED = False
@@ -149,13 +158,39 @@ def data_changed():
     else:
         return "no"
 
+from gevent.pywsgi import WSGIServer, WSGIHandler
+
+
+class ProxyFixHandler(WSGIHandler):
+    def format_request(self):
+        forwarded_for = self.headers.get("X-Forwarded-For")
+
+        if forwarded_for:
+            client_ip = forwarded_for.split(",")[0].strip()
+        else:
+            client_ip = self.client_address[0]
+
+        now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+
+        return '%s - - [%s] "%s" %s %s' % (
+            client_ip,
+            now,
+            self.requestline,
+            self.status,
+            self.response_length or '-'
+        )
+    
 if __name__ == '__main__':
-    from gevent import pywsgi
     from env import KEYFILE, CERTFILE
     threading.Thread(target=socket_listener, daemon=True).start()
-    http_server = pywsgi.WSGIServer((HOST, WEB_PORT),
-                                app,
-                                keyfile=KEYFILE,
-                                certfile=CERTFILE,
-                                log=sys.stderr)
+    
+    
+    http_server = WSGIServer(
+        (HOST, WEB_PORT),
+        app,
+        handler_class=ProxyFixHandler,
+        keyfile=KEYFILE,
+        certfile=CERTFILE,
+        log=sys.stderr
+    )
     http_server.serve_forever()
