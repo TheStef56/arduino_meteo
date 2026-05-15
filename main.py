@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3 -u
 import json, socket, threading, sys
 from datetime import datetime
 from Crypto.Cipher import AES
@@ -137,6 +137,7 @@ def socket_listener():
                 conn.close()
             except:
                 pass
+        time.sleep(5)
 
 @app.route('/')
 def home(): 
@@ -160,7 +161,6 @@ def data_changed():
 
 from gevent.pywsgi import WSGIServer, WSGIHandler
 
-
 class ProxyFixHandler(WSGIHandler):
     def format_request(self):
         forwarded_for = self.headers.get("X-Forwarded-For")
@@ -182,8 +182,7 @@ class ProxyFixHandler(WSGIHandler):
     
 if __name__ == '__main__':
     from env import KEYFILE, CERTFILE
-    threading.Thread(target=socket_listener, daemon=True).start()
-    
+    threading.Thread(target=socket_listener, daemon=True).start() 
     
     http_server = WSGIServer(
         (HOST, WEB_PORT),
