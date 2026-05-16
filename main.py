@@ -4,10 +4,12 @@ from datetime import datetime
 from Crypto.Cipher import AES
 from flask import Flask, render_template
 from mydb import *
-from env import AES_KEY, HOST, SOCKET_PORT, WEB_PORT
+from env import *
 from proto import WindData
 from datetime import datetime
 from werkzeug.middleware.proxy_fix import ProxyFix
+from pyrogram import Client
+
 
 # env.py example:
 
@@ -31,9 +33,12 @@ app.wsgi_app = ProxyFix(
     x_host=1
 )
 
+TELEGRAM_APP = Client("my_account", api_id=API_ID, api_hash=API_HASH, bot_token=TOKEN)
+
 DATA_SIZE = WindData.size 
 
 DATACHANGED = False
+LAST_RECEIVED = 0
 
 themes = [
     "Light",
@@ -87,8 +92,12 @@ time_zones = [
     "UTC+14 (LINT)"
 ]
 
+async def send_telegram_message():
+    async with TELEGRAM_APP:
+        await TELEGRAM_APP.send_message(CHAT, f"We have not received updates in a while!")
+
 def socket_listener():
-    global DATACHANGED
+    global DATACHANGED, LAST_RECEIVED
     while True:
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -98,17 +107,17 @@ def socket_listener():
             print(f"Socket server listening on port {SOCKET_PORT}...")
             while True:
                 try:
-                    print("WAITING FOR ACCEPT")
                     conn, _ = s.accept()
+                    conn.settimeout(30)
                 except TimeoutError:
-                    print("TIMEOUT ERROR")
+                    if datetime.now().timestamp() - LAST_RECEIVED >= 60*8: #8 min
+                        TELEGRAM_APP.run(send_telegram_message())
                     continue
                 except Exception as e:
                     traceback.print_exception(e)
+                    time.sleep(5)
                     continue
-                print("ACCEPTED, WAITING FOR RECEIVING")
                 data = conn.recv(1024)
-                print(f"RECEIVED, size={len(data)}")
                 crypted = data[:DATA_SIZE]
                 nonce = data[DATA_SIZE:DATA_SIZE+12]
                 auth_tag = data[DATA_SIZE+12:]
@@ -131,10 +140,9 @@ def socket_listener():
         wind_dir        : {w.windDirection}
                 """)
                 conn.close()
-                print("WRITING TO DB")
                 write_to_db(w)
-                print("WRITTEN TO DB")
                 DATACHANGED = True
+                LAST_RECEIVED = datetime.now().timestamp()
         except Exception as e:
             traceback.print_exception(e)
         finally:
@@ -142,7 +150,7 @@ def socket_listener():
                 conn.close()
             except:
                 pass
-        time.sleep(5)
+            s.close()
 
 @app.route('/')
 def home(): 
