@@ -40,7 +40,9 @@ def write_to_db(windData: WindData):
     DB_LOCK = True
     try:
         db = open(f"{PATH}/database.bin", "ab+")
+        db.seek(0)
         old_data = db.read()
+        db.seek(2)
         if len(old_data) % DATA_SIZE != 0:
             print(f"ERROR: Invalidf {PATH}Database Size: {len(old_data)}")
             db.close()

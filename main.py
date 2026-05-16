@@ -93,18 +93,22 @@ def socket_listener():
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.bind((HOST, SOCKET_PORT))
-            s.listen(5)
+            s.listen()
             s.settimeout(60)
             print(f"Socket server listening on port {SOCKET_PORT}...")
             while True:
                 try:
+                    print("WAITING FOR ACCEPT")
                     conn, _ = s.accept()
                 except TimeoutError:
+                    print("TIMEOUT ERROR")
                     continue
                 except Exception as e:
                     traceback.print_exception(e)
                     continue
+                print("ACCEPTED, WAITING FOR RECEIVING")
                 data = conn.recv(1024)
+                print(f"RECEIVED, size={len(data)}")
                 crypted = data[:DATA_SIZE]
                 nonce = data[DATA_SIZE:DATA_SIZE+12]
                 auth_tag = data[DATA_SIZE+12:]
@@ -127,8 +131,9 @@ def socket_listener():
         wind_dir        : {w.windDirection}
                 """)
                 conn.close()
-
+                print("WRITING TO DB")
                 write_to_db(w)
+                print("WRITTEN TO DB")
                 DATACHANGED = True
         except Exception as e:
             traceback.print_exception(e)
@@ -193,3 +198,5 @@ if __name__ == '__main__':
         log=sys.stderr
     )
     http_server.serve_forever()
+
+# TODO: DATACHANGED works with one connection at time, changing it to size comparison: fetch() -> size, check size < db_size
