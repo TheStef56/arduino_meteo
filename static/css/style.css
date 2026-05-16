@@ -197,3 +197,7 @@ canvas, table {
 .chart-type-icon-button[class*="active"] {
     background-color: #00e426;
 }
+
+#timezone {
+    text-align: center;
+}

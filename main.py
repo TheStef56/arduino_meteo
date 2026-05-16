@@ -72,7 +72,7 @@ time_zones = [
     "UTC-1 (AZOT)",
     "UTC-0 (GMT)",
     "UTC+1 (CET)",
-    "UTC+2 (EET)",
+    "UTC+2 (CEST/EET)",
     "UTC+3 (MSK)",
     "UTC+4 (GST)",
     "UTC+5 (PKT)",
@@ -175,7 +175,7 @@ class ProxyFixHandler(WSGIHandler):
         else:
             client_ip = self.client_address[0]
 
-        now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         return '%s - - [%s] "%s" %s %s' % (
             client_ip,

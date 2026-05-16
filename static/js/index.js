@@ -54,7 +54,7 @@ const timeZones = {
     "UTC-1 (AZOT)": -1, 
     "UTC-0 (GMT)": -0, 
     "UTC+1 (CET)": +1, 
-    "UTC+2 (EET)": +2, 
+    "UTC+2 (CEST/EET)": +2, 
     "UTC+3 (MSK)": +3, 
     "UTC+4 (GST)": +4, 
     "UTC+5 (PKT)": +5, 
@@ -613,5 +613,15 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });    
     });
+
+    let timezoneOffset = -(new Date().getTimezoneOffset())/60;
+    for (const [label, offset] of Object.entries(timeZones)) {
+        if (offset == timezoneOffset) {
+            document.getElementById("timezone").innerText = label;
+            currentTimezoneOffset = timeZones[label]*3600;
+            updateCharts();
+            break;
+        }
+    }
 });
 
