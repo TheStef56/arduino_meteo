@@ -101,6 +101,7 @@ def socket_listener():
     while True:
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             s.bind((HOST, SOCKET_PORT))
             s.listen()
             s.settimeout(60)
@@ -118,11 +119,16 @@ def socket_listener():
                     time.sleep(5)
                     continue
                 data = conn.recv(1024)
-                crypted = data[:DATA_SIZE]
-                nonce = data[DATA_SIZE:DATA_SIZE+12]
-                auth_tag = data[DATA_SIZE+12:]
-                aesgcm = AES.new(AES_KEY, AES.MODE_GCM, nonce=nonce)
-                decrypted = aesgcm.decrypt_and_verify(crypted, auth_tag)
+                try:
+                    crypted = data[:DATA_SIZE]
+                    nonce = data[DATA_SIZE:DATA_SIZE+12]
+                    auth_tag = data[DATA_SIZE+12:]
+                    aesgcm = AES.new(AES_KEY, AES.MODE_GCM, nonce=nonce)
+                    decrypted = aesgcm.decrypt_and_verify(crypted, auth_tag)
+                except Exception as e:
+                    conn.close()
+                    traceback.print_exception(e)
+                    continue
                 w = WindData()
                 w.from_binary(decrypted)
 
@@ -151,6 +157,7 @@ def socket_listener():
             except:
                 pass
             s.close()
+            time.sleep(1)
 
 @app.route('/')
 def home(): 
