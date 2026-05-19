@@ -1,5 +1,5 @@
 #!/usr/bin/python3 -u
-import json, socket, threading, sys
+import json, socket, threading, sys, asyncio
 from datetime import datetime
 from Crypto.Cipher import AES
 from flask import Flask, render_template
@@ -33,11 +33,10 @@ app.wsgi_app = ProxyFix(
     x_host=1
 )
 
-TELEGRAM_APP = Client("my_account", api_id=API_ID, api_hash=API_HASH, bot_token=TOKEN)
-
 DATA_SIZE = WindData.size 
 
 DATACHANGED = False
+SEND_EMERGENCY_MESSAGE = False
 LAST_RECEIVED = 0
 
 themes = [
@@ -92,12 +91,10 @@ time_zones = [
     "UTC+14 (LINT)"
 ]
 
-async def send_telegram_message():
-    async with TELEGRAM_APP:
-        await TELEGRAM_APP.send_message(CHAT, f"We have not received updates in a while!")
+# SOCKET -----------------------------------------------------------------------------------------
 
 def socket_listener():
-    global DATACHANGED, LAST_RECEIVED
+    global DATACHANGED, LAST_RECEIVED, SEND_EMERGENCY_MESSAGE
     while True:
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -112,7 +109,7 @@ def socket_listener():
                     conn.settimeout(30)
                 except TimeoutError:
                     if datetime.now().timestamp() - LAST_RECEIVED >= 60*8: #8 min
-                        TELEGRAM_APP.run(send_telegram_message())
+                        SEND_EMERGENCY_MESSAGE = True
                     continue
                 except Exception as e:
                     traceback.print_exception(e)
@@ -125,6 +122,10 @@ def socket_listener():
                     auth_tag = data[DATA_SIZE+12:]
                     aesgcm = AES.new(AES_KEY, AES.MODE_GCM, nonce=nonce)
                     decrypted = aesgcm.decrypt_and_verify(crypted, auth_tag)
+                except ValueError:
+                    conn.close()
+                    print("ValueError: probably garbage was sent. Ignoring.")
+                    continue
                 except Exception as e:
                     conn.close()
                     traceback.print_exception(e)
@@ -159,6 +160,8 @@ def socket_listener():
             s.close()
             time.sleep(1)
 
+# ROUTES ------------------------------------------------------------------------------------
+
 @app.route('/')
 def home(): 
     return render_template("index.html", themes       = themes,
@@ -178,6 +181,9 @@ def data_changed():
         return "yes"
     else:
         return "no"
+
+# Proxy logger -----------------------------------------------------------------------------------
+
 
 from gevent.pywsgi import WSGIServer, WSGIHandler
 
@@ -200,10 +206,27 @@ class ProxyFixHandler(WSGIHandler):
             self.response_length or '-'
         )
     
+# TELEGRAM EMERGENCY MESSAGE -------------------------------------------------------------------
+
+TELEGRAM_APP = Client("my_account", api_id=API_ID, api_hash=API_HASH, bot_token=TOKEN)
+
+async def telegram_worker():
+    global SEND_EMERGENCY_MESSAGE, TELEGRAM_APP
+    while True:
+        if SEND_EMERGENCY_MESSAGE:
+            SEND_EMERGENCY_MESSAGE = False
+            await TELEGRAM_APP.send_message(CHAT, "We have not received updates in a while!")
+        await asyncio.sleep(1)
+
+def telegram_loop():
+    TELEGRAM_APP.start()
+    TELEGRAM_APP.loop.create_task(telegram_worker())
+    TELEGRAM_APP.loop.run_forever()
+
+# ---------------------------------------------------------------------------------------------
+
 if __name__ == '__main__':
     from env import KEYFILE, CERTFILE
-    threading.Thread(target=socket_listener, daemon=True).start() 
-    
     http_server = WSGIServer(
         (HOST, WEB_PORT),
         app,
@@ -212,6 +235,9 @@ if __name__ == '__main__':
         certfile=CERTFILE,
         log=sys.stderr
     )
+    threading.Thread(target=socket_listener, daemon=True).start() 
+    threading.Thread(target=telegram_loop, daemon=True).start()
     http_server.serve_forever()
+    
 
 # TODO: DATACHANGED works with one connection at time, changing it to size comparison: fetch() -> size, check size < db_size
