@@ -37,8 +37,7 @@ DATA_SIZE = WindData.size
 
 DATACHANGED = False
 SEND_EMERGENCY_MESSAGE = False
-# LAST_RECEIVED = datetime.now().timestamp() fix like this later
-LAST_RECEIVED = 0
+LAST_RECEIVED = datetime.now().timestamp()
 
 themes = [
     "Light",
@@ -102,12 +101,12 @@ def socket_listener():
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             s.bind((HOST, SOCKET_PORT))
             s.listen()
-            s.settimeout(5)
+            s.settimeout(60)
             print(f"Socket server listening on port {SOCKET_PORT}...")
             while True:
                 try:
                     conn, _ = s.accept()
-                    conn.settimeout(5)
+                    conn.settimeout(30)
                 except TimeoutError:
                     if datetime.now().timestamp() - LAST_RECEIVED >= 60*8: #8 min
                         SEND_EMERGENCY_MESSAGE = True
@@ -214,9 +213,10 @@ TELEGRAM_APP = Client("my_account", api_id=API_ID, api_hash=API_HASH, bot_token=
 async def telegram_worker():
     global SEND_EMERGENCY_MESSAGE, TELEGRAM_APP
     while True:
-        if SEND_EMERGENCY_MESSAGE:
+        if SEND_EMERGENCY_MESSAGE is True:
             SEND_EMERGENCY_MESSAGE = False
             await TELEGRAM_APP.send_message(CHAT, "We have not received updates in a while!")
+            print("EMERGENCY TELEGRAM MESSAGE SENT!")
         await asyncio.sleep(1)
 
 # ---------------------------------------------------------------------------------------------
