@@ -37,6 +37,7 @@ DATA_SIZE = WindData.size
 
 DATACHANGED = False
 SEND_EMERGENCY_MESSAGE = False
+# LAST_RECEIVED = datetime.now().timestamp() fix like this later
 LAST_RECEIVED = 0
 
 themes = [
@@ -101,12 +102,12 @@ def socket_listener():
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             s.bind((HOST, SOCKET_PORT))
             s.listen()
-            s.settimeout(60)
+            s.settimeout(5)
             print(f"Socket server listening on port {SOCKET_PORT}...")
             while True:
                 try:
                     conn, _ = s.accept()
-                    conn.settimeout(30)
+                    conn.settimeout(5)
                 except TimeoutError:
                     if datetime.now().timestamp() - LAST_RECEIVED >= 60*8: #8 min
                         SEND_EMERGENCY_MESSAGE = True
@@ -218,26 +219,29 @@ async def telegram_worker():
             await TELEGRAM_APP.send_message(CHAT, "We have not received updates in a while!")
         await asyncio.sleep(1)
 
-def telegram_loop():
-    TELEGRAM_APP.start()
-    TELEGRAM_APP.loop.create_task(telegram_worker())
-    TELEGRAM_APP.loop.run_forever()
-
 # ---------------------------------------------------------------------------------------------
 
-if __name__ == '__main__':
+async def main():
     from env import KEYFILE, CERTFILE
-    http_server = WSGIServer(
-        (HOST, WEB_PORT),
-        app,
-        handler_class=ProxyFixHandler,
-        keyfile=KEYFILE,
-        certfile=CERTFILE,
-        log=sys.stderr
-    )
+    def run_server():
+        http_server = WSGIServer(
+            (HOST, WEB_PORT),
+            app,
+            handler_class=ProxyFixHandler,
+            keyfile=KEYFILE,
+            certfile=CERTFILE,
+            log=sys.stderr
+        )
+        http_server.serve_forever()
+
     threading.Thread(target=socket_listener, daemon=True).start() 
-    threading.Thread(target=telegram_loop, daemon=True).start()
-    http_server.serve_forever()
+    threading.Thread(target=run_server, daemon=True).start() 
+    
+    await TELEGRAM_APP.start()
+    await asyncio.create_task(telegram_worker())
+
+if __name__ == '__main__':
+    asyncio.run(main())
     
 
 # TODO: DATACHANGED works with one connection at time, changing it to size comparison: fetch() -> size, check size < db_size
