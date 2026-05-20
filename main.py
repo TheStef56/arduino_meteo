@@ -101,7 +101,7 @@ def socket_listener():
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             s.bind((HOST, SOCKET_PORT))
             s.listen()
-            s.settimeout(60)
+            s.settimeout(130)
             print(f"Socket server listening on port {SOCKET_PORT}...")
             while True:
                 try:
@@ -110,12 +110,23 @@ def socket_listener():
                 except TimeoutError:
                     if datetime.now().timestamp() - LAST_RECEIVED >= 60*8: #8 min
                         SEND_EMERGENCY_MESSAGE = True
-                    continue
+                        break
                 except Exception as e:
                     traceback.print_exception(e)
                     time.sleep(5)
                     continue
-                data = conn.recv(1024)
+
+                try:
+                    data = conn.recv(1024)
+                except TimeoutError:
+                    print("connection was open for more than 30 sec. closing it.")
+                    conn.close()
+                    continue
+                except Exception as e:
+                    conn.close()
+                    traceback.print_exception(e)
+                    continue
+
                 try:
                     crypted = data[:DATA_SIZE]
                     nonce = data[DATA_SIZE:DATA_SIZE+12]
