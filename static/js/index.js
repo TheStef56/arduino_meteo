@@ -598,7 +598,8 @@ document.addEventListener("DOMContentLoaded", () => {
     initSelectedCharts();
     fetchData();
     setInterval(() => {
-        fetch("/data-changed").then(data => {
+        let size = localData.length;
+        fetch(`/data-changed?size=${size}`).then(data => {
             data.text().then(res => {
                 if (res == "yes") fetchData();
             });

@@ -2,7 +2,7 @@
 import json, socket, threading, sys, asyncio
 from datetime import datetime
 from Crypto.Cipher import AES
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from mydb import *
 from env import *
 from proto import WindData
@@ -35,7 +35,6 @@ app.wsgi_app = ProxyFix(
 
 DATA_SIZE = WindData.size 
 
-DATACHANGED = False
 SEND_EMERGENCY_MESSAGE = False
 LAST_RECEIVED = datetime.now().timestamp()
 
@@ -94,7 +93,7 @@ time_zones = [
 # SOCKET -----------------------------------------------------------------------------------------
 
 def socket_listener():
-    global DATACHANGED, LAST_RECEIVED, SEND_EMERGENCY_MESSAGE
+    global LAST_RECEIVED, SEND_EMERGENCY_MESSAGE
     while True:
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -159,7 +158,6 @@ def socket_listener():
                 """)
                 conn.close()
                 write_to_db(w)
-                DATACHANGED = True
                 LAST_RECEIVED = datetime.now().timestamp()
         except Exception as e:
             traceback.print_exception(e)
@@ -186,9 +184,9 @@ def data():
 
 @app.route('/data-changed')
 def data_changed():
-    global DATACHANGED
-    if DATACHANGED:
-        DATACHANGED = False
+    client_size = request.args.get("size")
+    db_size = str(len(read_from_db()))
+    if client_size != db_size:
         return "yes"
     else:
         return "no"
@@ -253,6 +251,3 @@ async def main():
 
 if __name__ == '__main__':
     asyncio.run(main())
-    
-
-# TODO: DATACHANGED works with one connection at time, changing it to size comparison: fetch() -> size, check size < db_size
