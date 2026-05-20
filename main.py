@@ -110,7 +110,7 @@ def socket_listener():
                 except TimeoutError:
                     if datetime.now().timestamp() - LAST_RECEIVED >= 60*8: #8 min
                         SEND_EMERGENCY_MESSAGE = True
-                        break
+                    break
                 except Exception as e:
                     traceback.print_exception(e)
                     time.sleep(5)
