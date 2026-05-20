@@ -1,4 +1,4 @@
-import time, random, struct
+import time, random
 from proto import WindData
 
 DATA_SIZE = WindData.size
@@ -7,7 +7,9 @@ def write_to_db(now, windData: WindData):
     global DATA_SIZE
     try:
         db = open("database.bin", "ab+")
+        db.seek(0)
         old_data = db.read()
+        db.seek(2)
         if len(old_data) % DATA_SIZE != 0:
             print(f"ERROR: Invalid Database Size: {len(old_data)}")
             db.close()

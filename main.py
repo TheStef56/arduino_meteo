@@ -10,7 +10,6 @@ from datetime import datetime
 from werkzeug.middleware.proxy_fix import ProxyFix
 from pyrogram import Client
 
-
 # env.py example:
 
 # KEYFILE="/etc/letsencrypt/live/mydomain/privkey.pem"
@@ -94,18 +93,20 @@ time_zones = [
 
 def socket_listener():
     global LAST_RECEIVED, SEND_EMERGENCY_MESSAGE
+    socket_timeout = 130 # seconds
+    connection_timeout = 30 # seconds
     while True:
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             s.bind((HOST, SOCKET_PORT))
             s.listen()
-            s.settimeout(130)
+            s.settimeout(socket_timeout)
             print(f"Socket server listening on port {SOCKET_PORT}...")
             while True:
                 try:
-                    conn, _ = s.accept()
-                    conn.settimeout(30)
+                    conn, addr = s.accept()
+                    conn.settimeout(connection_timeout)
                 except TimeoutError:
                     if datetime.now().timestamp() - LAST_RECEIVED >= 60*8: #8 min
                         SEND_EMERGENCY_MESSAGE = True
@@ -118,7 +119,7 @@ def socket_listener():
                 try:
                     data = conn.recv(1024)
                 except TimeoutError:
-                    print("connection was open for more than 30 sec. closing it.")
+                    print(f"connection was open for more than {connection_timeout} sec. closing it. r_addr: {addr}")
                     conn.close()
                     continue
                 except Exception as e:
@@ -134,7 +135,7 @@ def socket_listener():
                     decrypted = aesgcm.decrypt_and_verify(crypted, auth_tag)
                 except ValueError:
                     conn.close()
-                    print("ValueError: probably garbage was sent. Ignoring.")
+                    print(f"ValueError: probably garbage was sent. Ignoring. r_addr: {addr}")
                     continue
                 except Exception as e:
                     conn.close()
