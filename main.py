@@ -194,8 +194,8 @@ def data_changed():
 
 # Proxy logger -----------------------------------------------------------------------------------
 
-
 from gevent.pywsgi import WSGIServer, WSGIHandler
+from gevent import ssl
 
 class ProxyFixHandler(WSGIHandler):
     def format_request(self):
@@ -216,6 +216,18 @@ class ProxyFixHandler(WSGIHandler):
             self.response_length or '-'
         )
     
+class WSGIServerWithLog(WSGIServer):
+    def handle_error(self, r, client_address):
+        exc = r
+        if isinstance(exc, ssl.SSLError):
+            msg = str(exc)
+            if "HTTP_REQUEST" in msg:
+                print("TEST")
+                return
+
+        # fallback to default logging
+        super().handle_error(r, client_address)
+    
 # TELEGRAM EMERGENCY MESSAGE -------------------------------------------------------------------
 
 TELEGRAM_APP = Client("my_account", api_id=API_ID, api_hash=API_HASH, bot_token=TOKEN)
@@ -234,7 +246,7 @@ async def telegram_worker():
 async def main():
     from env import KEYFILE, CERTFILE
     def run_server():
-        http_server = WSGIServer(
+        http_server = WSGIServerWithLog(
             (HOST, WEB_PORT),
             app,
             handler_class=ProxyFixHandler,
