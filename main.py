@@ -217,17 +217,18 @@ class ProxyFixHandler(WSGIHandler):
         )
     
 class WSGIServerWithLog(WSGIServer):
-    def handle_error(self, r, client_address):
-        exc = r
-        if isinstance(exc, ssl.SSLError):
-            msg = str(exc)
-            if "HTTP_REQUEST" in msg:
-                print("TEST")
+    def wrap_socket_and_handle(self, client_socket, address):
+        try:
+            return super().wrap_socket_and_handle(client_socket, address)
+        except ssl.SSLEOFError:
+            print(f"Ignored connection closed (EOF) from {address}")
+            return
+        except ssl.SSLError as e:
+            if e.reason == "HTTP_REQUEST":
+                print(f"Ignored plain HTTP on HTTPS port from {address}")
                 return
+            raise
 
-        # fallback to default logging
-        super().handle_error(r, client_address)
-    
 # TELEGRAM EMERGENCY MESSAGE -------------------------------------------------------------------
 
 TELEGRAM_APP = Client("my_account", api_id=API_ID, api_hash=API_HASH, bot_token=TOKEN)
