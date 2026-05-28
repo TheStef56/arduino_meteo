@@ -223,6 +223,9 @@ class WSGIServerWithLog(WSGIServer):
         except ssl.SSLEOFError:
             print(f"Ignored connection closed (EOF) from {address}")
             return
+        except ConnectionResetError:
+            print(f"Ignored connection reset from {address}")
+            return
         except ssl.SSLError as e:
             if e.reason == "HTTP_REQUEST":
                 print(f"Ignored plain HTTP on HTTPS port from {address}")
