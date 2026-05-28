@@ -201,3 +201,30 @@ canvas, table {
 #timezone {
     text-align: center;
 }
+
+#toggle-link {
+    background-color: rgb(194, 194, 194) !important;
+    display: flex !important;
+    align-items: center !important;
+    position: absolute;
+    border-radius: 50%;
+    height: 48px;
+    width: 48px;
+    left: 30px;
+    top: 8px;
+    font-size: 20px !important;
+    cursor: pointer;
+}
+
+#toggle-link[class*="active"] {
+    background-color: #00e426 !important;
+}
+
+@media screen and (max-width: 1430px) {
+    #toggle-link {
+        width: 42px;
+        height: 42px;
+        top: 4px;
+        left: 24px;
+    }
+}

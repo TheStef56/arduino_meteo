@@ -11,6 +11,7 @@ let localData             = [];
 let baselineSelected      = [];
 let candleSelected        = [];
 let meanSelected          = [];
+let chartsLinked          = true;
 
 const plotArrangements = {
     "Landscape" : {
@@ -70,7 +71,10 @@ const timeZones = {
 }
 
 function createChartById(id) {
-    return MyCharts.createChart(document.getElementById(id), {
+    let element = document.getElementById(id);
+    let chart = element.children[2];
+    if (chart) element.removeChild(chart);
+    return MyCharts.createChart(element, {
         width: window.innerWidth*wSizeFactor, 
         height: window.innerHeight*hSizeFactor,
         layout: {
@@ -296,108 +300,133 @@ function fetchData() {
     });
 }
 
-const windSpeedChart     = createChartById('wind-speed-chart');
-const windDirectionChart = createChartById('wind-direction-chart');
-const temperatureChart   = createChartById('temperature-chart');
-const humidityChart      = createChartById('humidity-chart');
-const bmpChart           = createChartById('bmp-chart');
-const batteryChart       = createChartById('battery-chart');
+let allCharts = [];
+let allCandleSeries = [];
+let allSeriesallSeries = [];
+let meanSeries = [];
 
-const allCharts = [windSpeedChart, windDirectionChart, temperatureChart, humidityChart, bmpChart, batteryChart]
+let windSpeedChart;
+let windDirectionChart;
+let temperatureChart;
+let humidityChart;
+let bmpChart;
+let batteryChart;
 
-const windSpeedSeries         = windSpeedChart.addSeries    (MyCharts.CandlestickSeries);
-const windDirectionSeries     = windDirectionChart.addSeries(MyCharts.CandlestickSeries);
-const temperatureSeries       = temperatureChart.addSeries  (MyCharts.CandlestickSeries);
-const humiditySeries          = humidityChart.addSeries     (MyCharts.CandlestickSeries);
-const bmpSeries               = bmpChart.addSeries          (MyCharts.CandlestickSeries);
-const batterySeries           = batteryChart.addSeries      (MyCharts.CandlestickSeries);
+let windSpeedSeries;
+let windDirectionSeries;
+let temperatureSeries;
+let humiditySeries;
+let bmpSeries;
+let batterySeries;
+let windBaselineSpeedSeries;
+let windDirectionBaselineSeries;
+let temperatureBaselineSeries;
+let humidityBaselineSeries;
+let bmpBaselineSeries;
+let batteryBaselineSeries;
+let windMeanSpeedSeries;
 
-const allCandleSeries = [windSpeedSeries, temperatureSeries, humiditySeries, bmpSeries, batterySeries, windDirectionSeries]
+function createCharts() {
+    windSpeedChart     = createChartById('wind-speed-chart');
+    windDirectionChart = createChartById('wind-direction-chart');
+    temperatureChart   = createChartById('temperature-chart');
+    humidityChart      = createChartById('humidity-chart');
+    bmpChart           = createChartById('bmp-chart');
+    batteryChart       = createChartById('battery-chart');
+    
+    windSpeedSeries         = windSpeedChart.addSeries    (MyCharts.CandlestickSeries);
+    windDirectionSeries     = windDirectionChart.addSeries(MyCharts.CandlestickSeries);
+    temperatureSeries       = temperatureChart.addSeries  (MyCharts.CandlestickSeries);
+    humiditySeries          = humidityChart.addSeries     (MyCharts.CandlestickSeries);
+    bmpSeries               = bmpChart.addSeries          (MyCharts.CandlestickSeries);
+    batterySeries           = batteryChart.addSeries      (MyCharts.CandlestickSeries);
+    
+    windBaselineSpeedSeries     = windSpeedChart.addSeries    (MyCharts.LineSeries);
+    windDirectionBaselineSeries = windDirectionChart.addSeries(MyCharts.LineSeries);
+    temperatureBaselineSeries   = temperatureChart.addSeries  (MyCharts.LineSeries);
+    humidityBaselineSeries      = humidityChart.addSeries     (MyCharts.LineSeries);
+    bmpBaselineSeries           = bmpChart.addSeries          (MyCharts.LineSeries);
+    batteryBaselineSeries       = batteryChart.addSeries      (MyCharts.LineSeries);
+    
+    windMeanSpeedSeries = windSpeedChart.addSeries(MyCharts.LineSeries, {color: "#00e426"});
 
-const windBaselineSpeedSeries     = windSpeedChart.addSeries    (MyCharts.LineSeries);
-const windDirectionBaselineSeries = windDirectionChart.addSeries(MyCharts.LineSeries);
-const temperatureBaselineSeries   = temperatureChart.addSeries  (MyCharts.LineSeries);
-const humidityBaselineSeries      = humidityChart.addSeries     (MyCharts.LineSeries);
-const bmpBaselineSeries           = bmpChart.addSeries          (MyCharts.LineSeries);
-const batteryBaselineSeries       = batteryChart.addSeries      (MyCharts.LineSeries);
+    // Wind Direction Series Cardinal Points --------------------------------------------------
 
-const allSeries = [windBaselineSpeedSeries, temperatureBaselineSeries, humidityBaselineSeries, bmpBaselineSeries, batteryBaselineSeries, windDirectionBaselineSeries]
+    const windDirectionCardinalSeries = windDirectionChart.addSeries(MyCharts.LineSeries, {
+        lastValueVisible: false,
+        priceLineVisible: false,
+    });
 
-const windMeanSpeedSeries = windSpeedChart.addSeries(MyCharts.LineSeries, {color: "#00e426"});
+    const lineWidth = 2;
 
-const meanSeries = [windMeanSpeedSeries];
+    const North = {
+        price: 360,
+        color: 'red',
+        lineWidth: lineWidth,
+        lineStyle: 2, // LineStyle.Dashed
+        axisLabelVisible: true,
+        title: 'N',
+    };
 
+    const North0 = {
+        price: 0,
+        color: 'red',
+        lineWidth: lineWidth,
+        lineStyle: 2, // LineStyle.Dashed
+        axisLabelVisible: true,
+        title: 'N',
+    };
 
-// Wind Direction Series Cardinal Points --------------------------------------------------
+    const South = {
+        price: 180,
+        color: 'red',
+        lineWidth: lineWidth,
+        lineStyle: 1, // LineStyle.Dotted
+        axisLabelVisible: true,
+        title: 'S',
+    };
+    const East = {
+        price: 90,
+        color: 'red',
+        lineWidth: lineWidth,
+        lineStyle: 2, // LineStyle.Dashed
+        axisLabelVisible: true,
+        title: 'E',
+    };
 
-const windDirectionCardinalSeries = windDirectionChart.addSeries(MyCharts.LineSeries, {
-    lastValueVisible: false,
-    priceLineVisible: false,
-});
+    const West = {
+        price: 270,
+        color: 'red',
+        lineWidth: lineWidth,
+        lineStyle: 2, // LineStyle.Dashed
+        axisLabelVisible: true,
+        title: 'W',
+    };
 
-const lineWidth = 2;
+    windDirectionCardinalSeries.createPriceLine(North0);
+    windDirectionCardinalSeries.createPriceLine(North);
+    windDirectionCardinalSeries.createPriceLine(South);
+    windDirectionCardinalSeries.createPriceLine(East);
+    windDirectionCardinalSeries.createPriceLine(West);
 
-const North = {
-    price: 360,
-    color: 'red',
-    lineWidth: lineWidth,
-    lineStyle: 2, // LineStyle.Dashed
-    axisLabelVisible: true,
-    title: 'N',
-};
+    windDirectionCardinalSeries.setData([
+    {
+        time: Date.now() / 1000,
+        value: 180,
+    }
+    ]);
 
-const North0 = {
-    price: 0,
-    color: 'red',
-    lineWidth: lineWidth,
-    lineStyle: 2, // LineStyle.Dashed
-    axisLabelVisible: true,
-    title: 'N',
-};
+    windDirectionCardinalSeries.applyOptions({
+    color: 'rgba(0,0,0,0)',
+    lineWidth: 0,
+    });
 
-const South = {
-    price: 180,
-    color: 'red',
-    lineWidth: lineWidth,
-    lineStyle: 1, // LineStyle.Dotted
-    axisLabelVisible: true,
-    title: 'S',
-};
-const East = {
-    price: 90,
-    color: 'red',
-    lineWidth: lineWidth,
-    lineStyle: 2, // LineStyle.Dashed
-    axisLabelVisible: true,
-    title: 'E',
-};
+    allCharts = [windSpeedChart, windDirectionChart, temperatureChart, humidityChart, bmpChart, batteryChart]
+    allCandleSeries = [windSpeedSeries, temperatureSeries, humiditySeries, bmpSeries, batterySeries, windDirectionSeries]
+    allSeries = [windBaselineSpeedSeries, temperatureBaselineSeries, humidityBaselineSeries, bmpBaselineSeries, batteryBaselineSeries, windDirectionBaselineSeries]
+    meanSeries = [windMeanSpeedSeries];
+}
 
-const West = {
-    price: 270,
-    color: 'red',
-    lineWidth: lineWidth,
-    lineStyle: 2, // LineStyle.Dashed
-    axisLabelVisible: true,
-    title: 'W',
-};
-
-windDirectionCardinalSeries.createPriceLine(North0);
-windDirectionCardinalSeries.createPriceLine(North);
-windDirectionCardinalSeries.createPriceLine(South);
-windDirectionCardinalSeries.createPriceLine(East);
-windDirectionCardinalSeries.createPriceLine(West);
-
-windDirectionCardinalSeries.setData([
-  {
-    time: Date.now() / 1000,
-    value: 180,
-  }
-]);
-
-windDirectionCardinalSeries.applyOptions({
-  color: 'rgba(0,0,0,0)',
-  lineWidth: 0,
-});
 
 // UI callbacks ---------------------------------------------------------------------------
 
@@ -491,9 +520,61 @@ function expandChart(target) {
     window.dispatchEvent(new Event('resize'));
 }
 
+function linkCharts() {
+    const allChartsDiv = Array.from(document.getElementsByClassName("tv-lightweight-charts"));
+    const allCanvases = [];
+
+    allChartsDiv.forEach(chart => {
+    let canv = chart.children[0].children[0].children[1].children[0].children[1];
+    allCanvases.push(canv);
+    });
+
+    function forwardEvent(sourceIdx, ev, type) {
+        allCanvases.forEach((canv2, idx2) => {
+            if (idx2 === sourceIdx) return;
+            let newEvent;
+            if (type === "wheel") {
+            newEvent = new WheelEvent("wheel", ev);
+            } else {
+            newEvent = new MouseEvent(type, ev);
+            }
+            newEvent.__synthetic = true;
+            canv2.dispatchEvent(newEvent);
+        });
+    }
+
+    allCanvases.forEach((canv, idx) => {
+    canv.addEventListener("wheel", (ev) => {
+        if (ev.__synthetic) return;
+        forwardEvent(idx, ev, "wheel");
+    });
+
+    canv.addEventListener("mousedown", (ev) => {
+        if (ev.__synthetic) return;
+        forwardEvent(idx, ev, "mousedown");
+    });
+
+    canv.addEventListener("mouseup", (ev) => {
+        if (ev.__synthetic) return;
+        forwardEvent(idx, ev, "mouseup");
+    });
+    });
+}
+
+function toggleLink() {
+    document.getElementById("toggle-link").classList.toggle("active");
+    createCharts();
+    updateCharts();
+    window.dispatchEvent(new Event('resize'));
+    if (!chartsLinked) linkCharts();
+    chartsLinked = !chartsLinked;
+}
+
 //  Navbar stuff ---------------------------------------------------------------------------
 
 document.addEventListener("DOMContentLoaded", () => {
+    createCharts();
+
     // Get all "navbar-burger" elements
     const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll(".navbar-burger"), 0);
 
@@ -624,5 +705,11 @@ document.addEventListener("DOMContentLoaded", () => {
             break;
         }
     }
-});
 
+
+    // TODO: sync also timeline and priceline manual scaling (with mousedrag)
+    // TODO: handle the auto scaling
+    // TODO: add auto-scale activate/deactivate button
+
+    linkCharts();
+});
