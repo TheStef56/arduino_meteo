@@ -520,53 +520,44 @@ function expandChart(target) {
     window.dispatchEvent(new Event('resize'));
 }
 
+// linked charts behaviour ------------------------------------------------------------------
+
+const linkedHandlers = [];
+
 function linkCharts() {
-    const allChartsDiv = Array.from(document.getElementsByClassName("tv-lightweight-charts"));
-    const allCanvases = [];
-
-    allChartsDiv.forEach(chart => {
-    let canv = chart.children[0].children[0].children[1].children[0].children[1];
-    allCanvases.push(canv);
-    });
-
-    function forwardEvent(sourceIdx, ev, type) {
-        allCanvases.forEach((canv2, idx2) => {
-            if (idx2 === sourceIdx) return;
-            let newEvent;
-            if (type === "wheel") {
-            newEvent = new WheelEvent("wheel", ev);
-            } else {
-            newEvent = new MouseEvent(type, ev);
-            }
-            newEvent.__synthetic = true;
-            canv2.dispatchEvent(newEvent);
+    unlinkCharts();
+    allCharts.forEach((chart1, idx1) => {
+        allCharts.forEach((chart2, idx2) => {
+            if (idx1 === idx2) return;
+            const handler = (range) => {
+                if (range) {
+                    chart2.timeScale().setVisibleLogicalRange(range);
+                }
+            };
+            linkedHandlers.push({
+                chart: chart1,
+                handler
+            });
+            chart1.timeScale().subscribeVisibleLogicalRangeChange(handler);
         });
-    }
-
-    allCanvases.forEach((canv, idx) => {
-    canv.addEventListener("wheel", (ev) => {
-        if (ev.__synthetic) return;
-        forwardEvent(idx, ev, "wheel");
     });
 
-    canv.addEventListener("mousedown", (ev) => {
-        if (ev.__synthetic) return;
-        forwardEvent(idx, ev, "mousedown");
-    });
+}
 
-    canv.addEventListener("mouseup", (ev) => {
-        if (ev.__synthetic) return;
-        forwardEvent(idx, ev, "mouseup");
+function unlinkCharts() {
+    linkedHandlers.forEach(({ chart, handler }) => {
+        chart.timeScale().unsubscribeVisibleLogicalRangeChange(handler);
     });
-    });
+    linkedHandlers.length = 0;
 }
 
 function toggleLink() {
     document.getElementById("toggle-link").classList.toggle("active");
-    createCharts();
-    updateCharts();
-    window.dispatchEvent(new Event('resize'));
-    if (!chartsLinked) linkCharts();
+    if (!chartsLinked) {
+        linkCharts();
+    } else {
+        unlinkCharts();
+    }
     chartsLinked = !chartsLinked;
 }
 
@@ -705,11 +696,6 @@ document.addEventListener("DOMContentLoaded", () => {
             break;
         }
     }
-
-
-    // TODO: sync also timeline and priceline manual scaling (with mousedrag)
-    // TODO: handle the auto scaling
-    // TODO: add auto-scale activate/deactivate button
 
     linkCharts();
 });
