@@ -23,11 +23,12 @@ int DATA_SENDING_INTERVAL   = 5*60*1000; // 5 min
 #include "proto.h"
 
 typedef enum {
-  NOTHING   = 0,
-  LED_DEBUG = 1,
-  DEBUG     = 2,
-  WIFI      = 4,
-  SIM       = 8,
+  NOTHING         = 0,
+  LED_DEBUG       = 1,
+  DEBUG           = 2,
+  WIFI            = 4,
+  SIM             = 8,
+  SIM_NO_SHUTDOWN = 16
 } Settings;
 
 typedef enum {
@@ -35,6 +36,7 @@ typedef enum {
   WIFI_DEBUG,
   WIFI_LED_DEBUG,
   SIM_NO_LED_DEBUG,
+  SIM_NO_LED_DEBUG_NO_SHUTDOWN,
   SIM_DEBUG,
   SIM_LED_DEBUG,
   MODE_LENGTH
@@ -45,6 +47,7 @@ const char* MODES_CODE[] = {
   "WD",
   "WL",
   "SN",
+  "SNN",
   "SD",
   "SL",
 };
@@ -83,6 +86,9 @@ void makeSettings() {
     case SIM_NO_LED_DEBUG:
       SETTINGS = SIM;
       break;
+    case SIM_NO_LED_DEBUG_NO_SHUTDOWN:
+      SETTINGS = SIM | SIM_NO_SHUTDOWN;
+      break;
     case SIM_DEBUG:
       SETTINGS = SIM | DEBUG;
       break;
@@ -103,7 +109,7 @@ void makeSettings() {
 
 void selectMode(uint32_t waitTime, uint32_t blinkInterval) {
   uint32_t startTime = millis();
-  Mode mode = SIM_NO_LED_DEBUG;                                // default mode
+  Mode mode = SIM_NO_LED_DEBUG_NO_SHUTDOWN;                                // default mode
   pinMode(MODE_SELECT_PIN, INPUT_PULLUP);
   PinStatus prevRead = digitalRead(MODE_SELECT_PIN);
   

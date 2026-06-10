@@ -57,6 +57,7 @@ void setup() {
     setupWifi();
     sendData = sendWifiData;
   }
+  if (SETTINGS & SIM_NO_SHUTDOWN) digitalWrite(MOSFET_PIN, HIGH);
 }
 
 void loop() {
@@ -91,9 +92,20 @@ void loop() {
 }
 
 void sendSimData(WindData data) {
-  digitalWrite(MOSFET_PIN, HIGH);
-  sendSimMessageEnc(REMOTE_HOST, REMOTE_PORT, (uint8_t*)(void*)&data, sizeof(WindData), AES_KEY, sizeof(AES_KEY));
-  digitalWrite(MOSFET_PIN, LOW);
+  bool success = false;
+  bool new_attempt = false;
+  do {
+    if (new_attempt) {
+      // if the module failed to send the data and reached timeout, we are rebooting it, even if we are in SIM_NO_SHUTDOWN mode
+      digitalWrite(MOSFET_PIN, LOW);
+      delay(5000);  // sleep for 5 seconds
+      digitalWrite(MOSFET_PIN, HIGH);
+    }
+    if (!(SETTINGS & SIM_NO_SHUTDOWN)) digitalWrite(MOSFET_PIN, HIGH);
+    success = sendSimMessageEnc(REMOTE_HOST, REMOTE_PORT, (uint8_t*)(void*)&data, sizeof(WindData), AES_KEY, sizeof(AES_KEY));
+    if (!(SETTINGS & SIM_NO_SHUTDOWN)) digitalWrite(MOSFET_PIN, LOW);
+    new_attempt = true;
+  } while (!success); 
 }
 
 void sendWifiData(WindData data) {

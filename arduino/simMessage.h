@@ -27,11 +27,12 @@ bool sendATCommand(const char *cmd, unsigned long timeoutMs = 2000) {
     return okReceived;
 }
 
-void sendSimMessage(const char *ip, int port, uint8_t *message, size_t size, unsigned long timeoutMs = 10000) {
+bool sendSimMessage(const char *ip, int port, uint8_t *message, size_t size, unsigned long timeoutMs = 10000) {
     char buf[128];
     bool success = false;
-
-    while (!success) {
+    unsigned long starting_time = millis();
+    unsigned long max_time = 2*60*1000;                                 // 2 min
+    while (!success && starting_time < max_time) {
         sendATCommand("AT");                                            // wake module
         sendATCommand("ATE0");                                          // disable echo
         sendATCommand("AT+CPIN=\""SIM_PIN"\"");
@@ -64,10 +65,11 @@ void sendSimMessage(const char *ip, int port, uint8_t *message, size_t size, uns
         sendATCommand("AT+NETCLOSE");                                   // stop tcpip socket mode
         sendATCommand("AT+CSCLK=1");                                    // go to sleep
     }
+    return success;
 }
 
 // --- Encrypted send ---
-void sendSimMessageEnc(const char *ip, int port, uint8_t *message, size_t size, uint8_t *aes_key, size_t aes_size) {
+bool sendSimMessageEnc(const char *ip, int port, uint8_t *message, size_t size, uint8_t *aes_key, size_t aes_size) {
     GCM<AES256> gcm;
 
     uint8_t nonce[12];
@@ -88,7 +90,7 @@ void sendSimMessageEnc(const char *ip, int port, uint8_t *message, size_t size, 
     memcpy(fullPayload + sizeof(encrypted), nonce, sizeof(nonce));
     memcpy(fullPayload + sizeof(encrypted) + sizeof(nonce), authTag, sizeof(authTag));
 
-    sendSimMessage(ip, port, fullPayload, sizeof(fullPayload));
+    return sendSimMessage(ip, port, fullPayload, sizeof(fullPayload));
 }
 
 #endif // SIM_MESSAGE_H
