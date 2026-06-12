@@ -3,6 +3,7 @@
 #include <WiFiS3.h>
 #include <ArduinoGraphics.h>
 #include <Arduino_LED_Matrix.h>
+#include <EEPROM.h>
 
 int WIND_MEASURING_INTERVAL = 5*1000;    // 5 sec
 int DATA_SENDING_INTERVAL   = 5*60*1000; // 5 min
@@ -13,7 +14,6 @@ int DATA_SENDING_INTERVAL   = 5*60*1000; // 5 min
   #define IF_SERIAL_DEBUG(serial)
 #endif
 
-
 #define IF_LED_DEBUG(fn) do {if (SETTINGS & LED_DEBUG) {fn;}} while (0)
 #define MODE_SELECT_PIN 13
 
@@ -21,6 +21,13 @@ int DATA_SENDING_INTERVAL   = 5*60*1000; // 5 min
 #define ledPrintDeInit() LED_MATRIX.end()
 
 #include "proto.h"
+
+const uint32_t MAGIC = 0xCAFEBABE;
+
+typedef struct {
+  uint32_t magic;
+  int mode;
+} EEPROM_Config;
 
 typedef enum {
   NOTHING         = 0,
@@ -38,6 +45,7 @@ typedef enum {
   SIM_NO_LED_DEBUG,
   SIM_NO_LED_DEBUG_NO_SHUTDOWN,
   SIM_DEBUG,
+  SIM_DEBUG_NO_SHUTDOWN,
   SIM_LED_DEBUG,
   MODE_LENGTH
 } Mode;
@@ -49,6 +57,7 @@ const char* MODES_CODE[] = {
   "SN",
   "SNN",
   "SD",
+  "SDN",
   "SL",
 };
 
@@ -92,6 +101,9 @@ void makeSettings() {
     case SIM_DEBUG:
       SETTINGS = SIM | DEBUG;
       break;
+    case SIM_DEBUG_NO_SHUTDOWN:
+      SETTINGS = SIM | DEBUG | SIM_NO_SHUTDOWN;
+      break;
     case SIM_LED_DEBUG:
       SETTINGS = SIM | DEBUG | LED_DEBUG;
       break;
@@ -109,7 +121,18 @@ void makeSettings() {
 
 void selectMode(uint32_t waitTime, uint32_t blinkInterval) {
   uint32_t startTime = millis();
-  Mode mode = SIM_NO_LED_DEBUG_NO_SHUTDOWN;                                // default mode
+  EEPROM_Config stored_config;
+  EEPROM.get(0, stored_config);
+  Mode mode;
+  if (stored_config.magic != MAGIC | digitalRead(MODE_SELECT_PIN) == LOW) {    // if config has never been stored to EEPROM or we want to force default by pressing button on startup
+    mode = SIM_NO_LED_DEBUG_NO_SHUTDOWN;                                       // default mode
+  } else {
+    mode = (Mode)stored_config.mode;                                           // stored mode
+  }
+
+  while (digitalRead(MODE_SELECT_PIN) == LOW);                                 // if we pressed button on startup, let's wait until it's not pressed to avoid cycling
+  delay(100);                                                                  // debounce
+
   pinMode(MODE_SELECT_PIN, INPUT_PULLUP);
   PinStatus prevRead = digitalRead(MODE_SELECT_PIN);
   
@@ -138,6 +161,9 @@ void selectMode(uint32_t waitTime, uint32_t blinkInterval) {
   makeSettings();
   pinMode(MODE_SELECT_PIN, INPUT);
   ledPrint("    ", false);
+  stored_config.magic = MAGIC;
+  stored_config.mode = MODE;
+  EEPROM.put(0, stored_config);
 }
 
 #endif // COMMON_H
